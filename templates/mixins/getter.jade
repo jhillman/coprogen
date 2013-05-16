@@ -1,0 +1,4 @@
+mixin getter(member)
+  | public #{member.type} get#{member.name.toUpperCase()} {
+  |     return #{member.name};
+  | }

@@ -1,0 +1,20 @@
+{
+  "name": "CodeGenerator",
+  "version": "0.0.1",
+  "description": "A powerful, flexible, language-agnostic, boilerplate-vanquishing code generation toolkit forged from pure awesomeness.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mediarain/CodeGenerator.git"
+  },
+  "author": "Scott Hillman",
+  "license": "BSD",
+  "readmeFilename": "README.md",
+  "gitHead": "1ed6cd4136cfdce765a3e1007c0dad1994850a22",
+  "dependencies": {
+    "jade": "~0.30.0"
+  }
+}

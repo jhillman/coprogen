@@ -1,0 +1,39 @@
+mixin member(member)
+  |   private #{member.type} #{member.name};
+  | 
+
+mixin getter(member)
+  |   public #{member.type} get#{member.name.charAt(0).toUpperCase() + member.name.slice(1)} {
+  |       return #{member.name};
+  |   }
+  | 
+
+ mixin setter(member)
+  |   public #{member.type} set#{member.name.charAt(0).toUpperCase() + member.name.slice(1)}(#{member.type} #{member.name}) {
+  |       this.#{member.name} = #{member.name};
+  |   }
+  | 
+
+
+| public class #{name} {
+| 
+| public #{name} { }
+| 
+
+each member in members
+  +member(member)
+
+| 
+| 
+|   /* Auto generated getters */
+each member in members
+  +getter(member)
+
+| 
+| 
+|   /* Auto generatted setters */
+each member in members
+  +setter(member)
+| 
+| }
+| 

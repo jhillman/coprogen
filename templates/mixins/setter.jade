@@ -1,0 +1,4 @@
+mixin setter(member)
+  | public #{member.type} set#{member.name.toUpperCase()}(#{member.type} #{member.name}) {
+  |     this.#{member.name} = #{member.name};
+  | }

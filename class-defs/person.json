@@ -1,0 +1,13 @@
+{
+  "name": "Person",
+  "members" : [
+    {
+      "type" : "String",
+      "name" : "name"
+    },
+    {
+      "type" : "int",
+      "name" : "age"
+    }
+  ]
+}
