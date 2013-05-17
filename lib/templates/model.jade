@@ -9,7 +9,7 @@ mixin getter(member)
   | 
 
  mixin setter(member)
-  |   public #{member.type} set#{UpperCamelCase(member.name)}(#{member.type} #{member.name}) {
+  |   public void set#{UpperCamelCase(member.name)}(#{member.type} #{member.name}) {
   |       this.#{member.name} = #{member.name};
   |   }
   | 
@@ -17,7 +17,7 @@ mixin getter(member)
 
 | public class #{name} {
 | 
-| public #{name} { }
+|   public #{name} { }
 | 
 
 each member in members
