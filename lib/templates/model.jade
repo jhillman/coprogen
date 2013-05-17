@@ -3,13 +3,13 @@ mixin member(member)
   | 
 
 mixin getter(member)
-  |   public #{member.type} get#{member.name.charAt(0).toUpperCase() + member.name.slice(1)} {
+  |   public #{member.type} get#{UpperCamelCase(member.name)} {
   |       return #{member.name};
   |   }
   | 
 
  mixin setter(member)
-  |   public #{member.type} set#{member.name.charAt(0).toUpperCase() + member.name.slice(1)}(#{member.type} #{member.name}) {
+  |   public #{member.type} set#{UpperCamelCase(member.name)}(#{member.type} #{member.name}) {
   |       this.#{member.name} = #{member.name};
   |   }
   | 
