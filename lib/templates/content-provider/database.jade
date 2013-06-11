@@ -1,0 +1,40 @@
+mixin sqlCreate(model)
+ |         db.execSQL(#{model.name}Table.SQL_CREATE);
+ | 
+
+mixin sqlDrop(model)
+ |         db.execSQL(#{model.name}Table.SQL_DROP);
+ | 
+
+| package #{packageName}.database;
+| 
+| import android.content.Context;
+| import android.database.sqlite.SQLiteDatabase;
+| import android.database.sqlite.SQLiteOpenHelper;
+| 
+| public class Database extends SQLiteOpenHelper {
+|     private static final String DATABASE_NAME = "#{databaseName}.db";
+|     private static final int DATABASE_VERSION = 1;
+| 
+|     public Database(final Context Context) {
+|         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+|     }
+| 
+|     @Override
+|     public final void onCreate(final SQLiteDatabase db) {
+each model in models
+  +sqlCreate(model)
+|    }
+|   
+|     @Override
+|     public final void onUpgrade(final SQLiteDatabase db, final int oldVersion, final int newVersion) {
+|         dropTablesAndCreate(db);
+|     }
+|   
+|     private final void dropTablesAndCreate(final SQLiteDatabase db) {
+each model in models
+  +sqlDrop(model)
+|   
+|        onCreate(db);
+|     }
+|}

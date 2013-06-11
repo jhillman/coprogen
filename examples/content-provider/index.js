@@ -7,6 +7,7 @@ var CodeGenerator = require('../../lib'),
 
 templateData = {
   'packageName': 'com.example',
+  'databaseName': 'person_db',
   'models': [
     {
       'name': 'Person',
@@ -26,6 +27,15 @@ templateData = {
         {
           'type' : 'double',
           'name' : 'body_fat'
+        }
+      ]
+    },
+    {
+      'name': 'Place',
+      'members': [
+        {
+          'type': 'String',
+          'name': 'address'
         }
       ]
     }
