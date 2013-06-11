@@ -1,0 +1,74 @@
+mixin member(member)
+ |     private #{member.type} m#{camelCase(capitalize(member.name))}; 
+ | 
+
+mixin setter(member)
+ |     public void set#{camelCase(capitalize(member.name))}(#{member.type} #{camelCase(member.name)}) {
+ |         m#{camelCase(capitalize(member.name))} = #{camelCase(member.name)};
+ |         mValues.put(
+ +getTableValue(member)
+ | , #{camelCase(member.name)});
+ |     }
+ | 
+
+mixin getter(member)
+ |     public #{member.type} get#{camelCase(capitalize(member.name))} {
+ |         return m#{camelCase(capitalize(member.name))};
+ |     }
+ | 
+
+mixin getTableValue(member)
+ | #{capitalize(name)}Table.#{upperCase(member.name)}
+
+mixin setContentValues(member)
+ - if (member.type === 'boolean')
+  |        set#{camelCase(capitalize(member.name))}(cursor.isNull(cursor.getColumnIndex(
+  +getTableValue(member)
+  | )) ? false : cursor.getInt(cursor.getColumnIndex(
+  +getTableValue(member)
+  | )) != 0); 
+  | 
+ - else
+  |        set#{camelCase(capitalize(member.name))}(cursor.get#{capitalize(member.type)}(cursor.getColumnIndex(
+  +getTableValue(member)
+  | ))); 
+  | 
+
+| package #{packageName}.model;
+| 
+| import android.content.ContentValues;
+| import android.database.Cursor;
+| import #{packageName}.database.tables.#{name}Table;
+| 
+| public class #{name} {
+|
+|     private long mId;
+| 
+each member in members
+  +member(member)
+| 
+|     private ContentValues mValues = new ContentValues();
+| 
+|     public #{name}(final Cursor cursor) {
+|         setId(cursor.getLong(cursor.getColumnIndex(#{name}Table.ID)));
+| 
+each member in members
+  +setContentValues(member)
+|    }
+| 
+|     /* Auto generatted setters */
+each member in members
+  +setter(member)
+|  
+|     /* Auto generated getters */
+|     public long getId() {
+|         return mId;
+|     }
+| 
+each member in members
+  +getter(member)
+|   
+|     public ContentValues getContentValues() {
+|         return mValues;
+|     }
+|}

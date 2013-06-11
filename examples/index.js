@@ -21,8 +21,6 @@ templateData = {
 
 generator = new CodeGenerator();
 
-console.log(__dirname + 'PersonModel.java');
-
-generator.generate('model', templateData, __dirname + '/PersonModel.java', function(err, data) {
-  console.log(err, data);
+generator.generateModel('model', templateData, __dirname, function(err, data) {
+  if (err) console.log('error: ' + err);
 })

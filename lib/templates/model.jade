@@ -1,39 +1,34 @@
 mixin member(member)
-  |   private #{member.type} #{member.name};
-  | 
+ |     private #{member.type} m#{capitalize(member.name)}; 
+ | 
 
 mixin getter(member)
-  |   public #{member.type} get#{UpperCamelCase(member.name)} {
-  |       return #{member.name};
-  |   }
-  | 
+ |     public #{member.type} get#{capitalize(member.name)} {
+ |         return m#{capitalize(member.name)};
+ |     }
+ | 
 
- mixin setter(member)
-  |   public void set#{UpperCamelCase(member.name)}(#{member.type} #{member.name}) {
-  |       this.#{member.name} = #{member.name};
-  |   }
-  | 
-
+mixin setter(member)
+ |     public void set#{capitalize(member.name)}(#{member.type} #{member.name}) {
+ |         m#{capitalize(member.name)} = #{member.name};
+ |     }
+ | 
 
 | public class #{name} {
-| 
-|   public #{name} { }
-| 
 
 each member in members
   +member(member)
 
 | 
 | 
-|   /* Auto generated getters */
+|     /* Auto generated getters */
 each member in members
   +getter(member)
 
 | 
 | 
-|   /* Auto generatted setters */
+|     /* Auto generatted setters */
 each member in members
   +setter(member)
 | 
-| }
-| 
+|}

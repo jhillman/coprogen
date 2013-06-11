@@ -15,6 +15,9 @@
   "readmeFilename": "README.md",
   "gitHead": "1ed6cd4136cfdce765a3e1007c0dad1994850a22",
   "dependencies": {
-    "jade": "~0.30.0"
+    "jade": "~0.30.0",
+    "stewardess": "~0.2.2",
+    "waitress": "~0.1.5",
+    "path": "~0.4.9"
   }
 }
