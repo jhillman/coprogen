@@ -1,0 +1,226 @@
+mixin contentUri(model)
+ |     public static final Uri #{upperCase(model.name)}_CONTENT_URI = Uri.withAppendedPath(#{capitalize(camelCase(databaseName))}Provider.AUTHORITY_URI, #{model.name}Content.CONTENT_PATH);
+ | 
+
+mixin constant(model, i)
+ |     private static final int #{upperCase(model.name)}_DIR = #{i * 2};
+ |     private static final int #{upperCase(model.name)}_ID = #{(i * 2) + 1};
+ | 
+
+mixin uriMatcher(model)
+ |         URI_MATCHER.addURI(AUTHORITY, #{model.name}Content.CONTENT_PATH, #{upperCase(model.name)}_DIR);
+ |         URI_MATCHER.addURI(AUTHORITY, #{model.name}Content.CONTENT_PATH + "/#",    #{upperCase(model.name)}_ID);
+ | 
+
+mixin contentColumns(model)
+ |     public static final class #{model.name}Content implements BaseColumns {
+ |         public static final String CONTENT_PATH = "#{lowerCase(model.name)}";
+ |         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.#{databaseName}.#{lowerCase(model.name)}";
+ |         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.#{databaseName}.#{lowerCase(model.name)}";
+ |         public static final String[] ALL_COLUMNS = #{model.name}Table.ALL_COLUMNS;
+ |     }
+ | 
+
+mixin typeCase(model)
+ |             case #{upperCase(model.name)}_DIR:
+ |                 return #{model.name}Content.CONTENT_TYPE;
+ |             case #{upperCase(model.name)}_ID:
+ |                 return #{model.name}Content.CONTENT_ITEM_TYPE;
+ | 
+
+mixin queryCase(model)
+ |             case #{upperCase(model.name)}_ID:
+ |                 queryBuilder.appendWhere(#{model.name}Table.ID + "=" + uri.getLastPathSegment());
+ |             case #{upperCase(model.name)}_DIR:
+ |                 queryBuilder.setTables(#{model.name}Table.TABLE_NAME);
+ |                 break;
+ | 
+
+mixin insertCase(model)
+ |                 case #{upperCase(model.name)}_DIR:
+ |                 case #{upperCase(model.name)}_ID:
+ |                     final long #{lowerCase(model.name)}Id = dbConnection.insertOrThrow(#{model.name}Table.TABLE_NAME, null, values);
+ |                     final Uri new#{model.name}Uri = ContentUris.withAppendedId(#{upperCase(model.name)}_CONTENT_URI, #{lowerCase(model.name)}Id);
+ |                     getContext().getContentResolver().notifyChange(new#{model.name}Uri, null);
+ |                     dbConnection.setTransactionSuccessful();
+ |                     return new#{model.name}Uri;
+ | 
+
+mixin updateCase(model)
+ |                case #{upperCase(model.name)}_DIR :
+ |                    updateCount = dbConnection.update(#{model.name}Table.TABLE_NAME, values, selection, selectionArgs);
+ |                    dbConnection.setTransactionSuccessful();
+ |                    break;
+ |                case #{upperCase(model.name)}_ID :
+ |                    final long #{lowerCase(model.name)}Id = ContentUris.parseId(uri);
+ |                    updateCount = dbConnection.update(#{model.name}Table.TABLE_NAME, values, 
+ |                        #{model.name}Table.ID + "=" + #{lowerCase(model.name)}Id + (TextUtils.isEmpty(selection) ? "" : " AND (" + selection + ")"), selectionArgs);
+ |                    dbConnection.setTransactionSuccessful();
+ |                    break;
+ | 
+
+mixin deleteCase(model)
+ |                 case #{upperCase(model.name)}_DIR :
+ |                     deleteCount = dbConnection.delete(#{model.name}Table.TABLE_NAME, selection, selectionArgs);
+ |                     dbConnection.setTransactionSuccessful();
+ |                     break;
+ |                 case #{upperCase(model.name)}_ID :
+ |                     deleteCount = dbConnection.delete(#{model.name}Table.TABLE_NAME, #{model.name}Table.WHERE_ID_EQUALS, new String[] { uri.getLastPathSegment() });
+ |                     dbConnection.setTransactionSuccessful();
+ |                     break;
+ | 
+
+| package #{packageName}.provider;
+| 
+| import #{packageName}.database.#{capitalize(camelCase(databaseName))}Database;
+| 
+| import #{packageName}.database.table.*;
+| 
+| import android.provider.BaseColumns;
+| import android.text.TextUtils;
+| import android.content.ContentUris;
+| import android.database.sqlite.SQLiteQueryBuilder;
+| 
+| import android.content.ContentProvider;
+| import android.content.ContentValues;
+| import android.content.UriMatcher;
+| import android.database.Cursor;
+| import android.database.sqlite.SQLiteDatabase;
+| import android.net.Uri;
+| 
+| public class #{capitalize(camelCase(databaseName))}Provider extends ContentProvider {
+|     public static final String AUTHORITY = "#{packageName}.provider.#{databaseName}";
+|     public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
+| 
+each model in models
+ +contentUri(model)
+| 
+|     private static final UriMatcher URI_MATCHER;
+|     private #{capitalize(camelCase(databaseName))}Database mDatabase;
+| 
+each model, i in models
+ +constant(model, i)
+| 
+|     static {
+|         URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
+| 
+each model in models
+ +uriMatcher(model)
+|    }
+| 
+each model in models
+ +contentColumns(model)
+| 
+|     @Override
+|     public final boolean onCreate() {
+|         mDatabase = new #{capitalize(camelCase(databaseName))}Database(getContext());
+|         return true;
+|     }
+| 
+|     @Override
+|     public final String getType(final Uri uri) {
+|         switch (URI_MATCHER.match(uri)) {
+each model in models
+ +typeCase(model)
+| 
+|             default:
+|                 throw new IllegalArgumentException("Unsupported URI: " + uri);
+|         }
+|     }
+| 
+|     @Override
+|     public final Cursor query(final Uri uri, final String[] projection, final String selection, final String[] selectionArgs, final String sortOrder) {
+|         final SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+|         final SQLiteDatabase dbConnection = mDatabase.getReadableDatabase();
+| 
+|         switch (URI_MATCHER.match(uri)) {
+each model in models
+ +queryCase(model)
+| 
+|             default :
+|                 throw new IllegalArgumentException("Unsupported URI:" + uri);
+|         }
+| 
+|         Cursor cursor = queryBuilder.query(dbConnection, projection, selection, selectionArgs, null, null, sortOrder);
+|         cursor.setNotificationUri(getContext().getContentResolver(), uri);
+| 
+|         return cursor;
+| 
+|     }
+| 
+|     @Override
+|     public final Uri insert(final Uri uri, final ContentValues values) {
+|         final SQLiteDatabase dbConnection = mDatabase.getWritableDatabase();
+| 
+|         try {
+|             dbConnection.beginTransaction();
+| 
+|             switch (URI_MATCHER.match(uri)) {
+each model in models
+ +insertCase(model)
+| 
+|                 default :
+|                     throw new IllegalArgumentException("Unsupported URI:" + uri);
+|             }
+|         } catch (Exception e) {
+|             e.printStackTrace();
+|         } finally {
+|             dbConnection.endTransaction();
+|         }
+| 
+|         return null;
+|     }
+| 
+|     @Override
+|     public final int update(final Uri uri, final ContentValues values, final String selection, final String[] selectionArgs) {
+|         final SQLiteDatabase dbConnection = mDatabase.getWritableDatabase();
+|         int updateCount = 0;
+| 
+|         try {
+|             dbConnection.beginTransaction();
+| 
+|             switch (URI_MATCHER.match(uri)) {
+each model in models
+ +updateCase(model)
+| 
+|                 default :
+|                     throw new IllegalArgumentException("Unsupported URI:" + uri);
+|             }
+|         } finally {
+|             dbConnection.endTransaction();
+|         }
+| 
+|         if (updateCount > 0) {
+|             getContext().getContentResolver().notifyChange(uri, null);
+|         }
+| 
+|         return updateCount;
+| 
+|     }
+| 
+|     @Override
+|     public final int delete(final Uri uri, final String selection, final String[] selectionArgs) {
+|         final SQLiteDatabase dbConnection = mDatabase.getWritableDatabase();
+|         int deleteCount = 0;
+| 
+|         try {
+|             dbConnection.beginTransaction();
+| 
+|             switch (URI_MATCHER.match(uri)) {
+each model in models
+ +deleteCase(model)
+| 
+|                 default :
+|                     throw new IllegalArgumentException("Unsupported URI:" + uri);
+|             }
+|         } finally {
+|             dbConnection.endTransaction();
+|         }
+| 
+|         if (deleteCount > 0) {
+|             getContext().getContentResolver().notifyChange(uri, null);
+|         }
+| 
+|         return deleteCount;
+|     }
+| }

@@ -1,0 +1,37 @@
+{
+  "type": "content-provider",
+  "packageName": "com.example",
+  "databaseName": "people_and_places",
+  "models": [
+    {
+      "name": "Person",
+      "members" : [
+        {
+          "type" : "String",
+          "name" : "name"
+        },
+        {
+          "type" : "int",
+          "name" : "age"
+        },
+        {
+          "type" : "boolean",
+          "name" : "alive"
+        },
+        {
+          "type" : "double",
+          "name" : "body_fat"
+        }
+      ]
+    },
+    {
+      "name": "Place",
+      "members": [
+        {
+          "type": "String",
+          "name": "address"
+        }
+      ]
+    }
+  ]
+}

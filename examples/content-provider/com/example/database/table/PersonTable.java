@@ -20,4 +20,6 @@ public interface PersonTable {
     String SQL_INSERT = "INSERT INTO person ( name, age, alive, body_fat ) VALUES ( ?, ?, ?, ? )";
  
     String SQL_DROP = "DROP TABLE IF EXISTS person";
+ 
+    String WHERE_ID_EQUALS = ID + "=?";
 }

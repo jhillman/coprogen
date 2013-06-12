@@ -14,4 +14,6 @@ public interface PlaceTable {
     String SQL_INSERT = "INSERT INTO place ( address ) VALUES ( ? )";
  
     String SQL_DROP = "DROP TABLE IF EXISTS place";
+ 
+    String WHERE_ID_EQUALS = ID + "=?";
 }
