@@ -12,7 +12,7 @@ mixin setter(member)
  | 
 
 mixin getter(member)
- |     public #{member.type} get#{camelCase(capitalize(member.name))} {
+ |     public #{member.type} get#{camelCase(capitalize(member.name))}() {
  |         return m#{camelCase(capitalize(member.name))};
  |     }
  | 
@@ -38,10 +38,9 @@ mixin setContentValues(member)
 | 
 | import android.content.ContentValues;
 | import android.database.Cursor;
-| import #{packageName}.database.tables.#{name}Table;
+| import #{packageName}.database.table.#{name}Table;
 | 
 | public class #{name} {
-|
 |     private long mId;
 | 
 each member in members
@@ -57,6 +56,11 @@ each member in members
 |    }
 | 
 |     /* Auto generatted setters */
+|     public void setId(long id) {
+|         mId = id;
+|         mValues.put(#{name}Table.ID, id);
+|     }
+| 
 each member in members
   +setter(member)
 |  

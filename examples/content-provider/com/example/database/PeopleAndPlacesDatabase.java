@@ -1,5 +1,7 @@
 package com.example.database;
  
+import com.example.database.table.*;
+ 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -8,7 +10,7 @@ public class PeopleAndPlacesDatabase extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "people_and_places.db";
     private static final int DATABASE_VERSION = 1;
  
-    public PeopleAndPlacesDatabase(final Context Context) {
+    public PeopleAndPlacesDatabase(final Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
  

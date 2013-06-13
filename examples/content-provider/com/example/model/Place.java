@@ -2,10 +2,9 @@ package com.example.model;
  
 import android.content.ContentValues;
 import android.database.Cursor;
-import com.example.database.tables.PlaceTable;
+import com.example.database.table.PlaceTable;
  
 public class Place {
-|
     private long mId;
  
     private String mAddress; 
@@ -18,6 +17,11 @@ public class Place {
     }
  
     /* Auto generatted setters */
+    public void setId(long id) {
+        mId = id;
+        mValues.put(PlaceTable.ID, id);
+    }
+ 
     public void setAddress(String address) {
         mAddress = address;
         mValues.put(PlaceTable.ADDRESS, address);
@@ -28,7 +32,7 @@ public class Place {
         return mId;
     }
  
-    public String getAddress {
+    public String getAddress() {
         return mAddress;
     }
    

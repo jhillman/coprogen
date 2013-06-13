@@ -2,10 +2,9 @@ package com.example.model;
  
 import android.content.ContentValues;
 import android.database.Cursor;
-import com.example.database.tables.PersonTable;
+import com.example.database.table.PersonTable;
  
 public class Person {
-|
     private long mId;
  
     private String mName; 
@@ -27,6 +26,11 @@ public class Person {
     }
  
     /* Auto generatted setters */
+    public void setId(long id) {
+        mId = id;
+        mValues.put(PersonTable.ID, id);
+    }
+ 
     public void setName(String name) {
         mName = name;
         mValues.put(PersonTable.NAME, name);
@@ -52,19 +56,19 @@ public class Person {
         return mId;
     }
  
-    public String getName {
+    public String getName() {
         return mName;
     }
  
-    public int getAge {
+    public int getAge() {
         return mAge;
     }
  
-    public boolean getAlive {
+    public boolean getAlive() {
         return mAlive;
     }
  
-    public double getBodyFat {
+    public double getBodyFat() {
         return mBodyFat;
     }
    
