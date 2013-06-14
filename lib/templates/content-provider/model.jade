@@ -48,6 +48,8 @@ each member in members
 | 
 |     private ContentValues mValues = new ContentValues();
 | 
+|     public #{name}() {}
+| 
 |     public #{name}(final Cursor cursor) {
 |         setId(cursor.getLong(cursor.getColumnIndex(#{name}Table.ID)));
 | 
@@ -55,7 +57,7 @@ each member in members
   +setContentValues(member)
 |    }
 | 
-|     /* Auto generatted setters */
+|     /* Auto generated setters */
 |     public void setId(long id) {
 |         mId = id;
 |         mValues.put(#{name}Table.ID, id);
