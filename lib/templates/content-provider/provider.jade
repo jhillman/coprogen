@@ -2,9 +2,17 @@ mixin contentUri(model)
  |     public static final Uri #{upperCase(model.name)}_CONTENT_URI = Uri.withAppendedPath(#{capitalize(camelCase(databaseName))}Provider.AUTHORITY_URI, #{model.name}Content.CONTENT_PATH);
  | 
 
+mixin contentUriRelationship(relationship)
+ |     public static final Uri #{upperCase(relationship.parent)}_JOIN_#{upperCase(relationship.child)}_CONTENT_URI = Uri.withAppendedPath(#{capitalize(camelCase(databaseName))}Provider.AUTHORITY_URI, #{relationship.parent}Join#{relationship.child}Content.CONTENT_PATH);
+ | 
+
 mixin constant(model, i)
  |     private static final int #{upperCase(model.name)}_DIR = #{i * 2};
  |     private static final int #{upperCase(model.name)}_ID = #{(i * 2) + 1};
+ | 
+
+mixin constantRelationship(relationship, i)
+ |     private static final int #{upperCase(relationship.parent)}_JOIN_#{upperCase(relationship.child)}_DIR = #{i * 2};
  | 
 
 mixin uriMatcher(model)
@@ -12,12 +20,22 @@ mixin uriMatcher(model)
  |         URI_MATCHER.addURI(AUTHORITY, #{model.name}Content.CONTENT_PATH + "/#",    #{upperCase(model.name)}_ID);
  | 
 
+mixin uriMatcherRelationship(relationship)
+ |         URI_MATCHER.addURI(AUTHORITY, #{relationship.parent}Join#{relationship.child}Content.CONTENT_PATH, #{upperCase(relationship.parent)}_JOIN_#{upperCase(relationship.child)}_DIR);
+ | 
+
 mixin contentColumns(model)
  |     public static final class #{model.name}Content implements BaseColumns {
  |         public static final String CONTENT_PATH = "#{lowerCase(model.name)}";
  |         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.#{databaseName}.#{lowerCase(model.name)}";
  |         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.#{databaseName}.#{lowerCase(model.name)}";
- |         public static final String[] ALL_COLUMNS = #{model.name}Table.ALL_COLUMNS;
+ |     }
+ | 
+
+mixin contentColumnsRelationship(relationship)
+ |     public static final class #{relationship.parent}Join#{relationship.child}Content implements BaseColumns {
+ |         public static final String CONTENT_PATH = "#{lowerCase(relationship.parent)}_join_#{lowerCase(relationship.child)}";
+ |         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.#{databaseName}.#{lowerCase(relationship.parent)}_join_#{lowerCase(relationship.child)}";
  |     }
  | 
 
@@ -28,11 +46,22 @@ mixin typeCase(model)
  |                 return #{model.name}Content.CONTENT_ITEM_TYPE;
  | 
 
+mixin typeCaseRelationship(relationship)
+ |             case #{upperCase(relationship.parent)}_JOIN_#{upperCase(relationship.child)}_DIR:
+ |                 return #{relationship.parent}Join#{relationship.child}Content.CONTENT_TYPE;
+ | 
+
 mixin queryCase(model)
  |             case #{upperCase(model.name)}_ID:
  |                 queryBuilder.appendWhere(#{model.name}Table.ID + "=" + uri.getLastPathSegment());
  |             case #{upperCase(model.name)}_DIR:
  |                 queryBuilder.setTables(#{model.name}Table.TABLE_NAME);
+ |                 break;
+ | 
+
+mixin queryCaseRelationship(relationship)
+ |             case #{upperCase(relationship.parent)}_JOIN_#{upperCase(relationship.child)}_DIR:
+ |                 queryBuilder.setTables(#{relationship.parent}Table.TABLE_NAME + " LEFT OUTER JOIN " + #{relationship.child}Table.TABLE_NAME + " ON (" + #{relationship.parent}Table.TABLE_NAME + "." + #{relationship.parent}Table.#{upperCase(relationship.join_column)} + "=" + #{relationship.child}Table.TABLE_NAME + "." + #{relationship.child}Table.#{upperCase(relationship.join_column)} + ")");
  |                 break;
  | 
 
@@ -95,21 +124,33 @@ mixin deleteCase(model)
 each model in models
  +contentUri(model)
 | 
+each relationship in relationships
+ +contentUriRelationship(relationship)
+| 
 |     private static final UriMatcher URI_MATCHER;
 |     private #{capitalize(camelCase(databaseName))}Database mDatabase;
 | 
 each model, i in models
  +constant(model, i)
 | 
+each relationship, i in relationships
+ +constantRelationship(relationship, i + models.length)
+| 
 |     static {
 |         URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
 | 
 each model in models
  +uriMatcher(model)
+| 
+each relationship in relationships
+ +uriMatcherRelationship(relationship)
 |    }
 | 
 each model in models
  +contentColumns(model)
+| 
+each relationship in relationships
+ +contentColumnsRelationship(relationship)
 | 
 |     @Override
 |     public final boolean onCreate() {
@@ -122,6 +163,9 @@ each model in models
 |         switch (URI_MATCHER.match(uri)) {
 each model in models
  +typeCase(model)
+| 
+each relationship in relationships
+ +typeCaseRelationship(relationship)
 | 
 |             default:
 |                 throw new IllegalArgumentException("Unsupported URI: " + uri);
@@ -136,6 +180,9 @@ each model in models
 |         switch (URI_MATCHER.match(uri)) {
 each model in models
  +queryCase(model)
+| 
+each relationship in relationships
+ +queryCaseRelationship(relationship)
 | 
 |             default :
 |                 throw new IllegalArgumentException("Unsupported URI:" + uri);
