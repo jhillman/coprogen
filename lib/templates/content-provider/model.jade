@@ -20,17 +20,20 @@ mixin getter(member)
 mixin getTableValue(member)
  | #{capitalize(name)}Table.#{upperCase(member.name)}
 
+mixin getTableValueWithPrefix(member)
+ | prefix + #{capitalize(name)}Table.#{upperCase(member.name)}
+
 mixin setContentValues(member)
  - if (member.type === 'boolean')
   |        set#{camelCase(capitalize(member.name))}(cursor.isNull(cursor.getColumnIndex(
-  +getTableValue(member)
+  +getTableValueWithPrefix(member)
   | )) ? false : cursor.getInt(cursor.getColumnIndex(
-  +getTableValue(member)
+  +getTableValueWithPrefix(member)
   | )) != 0); 
   | 
  - else
   |        set#{camelCase(capitalize(member.name))}(cursor.get#{capitalize(member.type)}(cursor.getColumnIndex(
-  +getTableValue(member)
+  +getTableValueWithPrefix(member)
   | ))); 
   | 
 
@@ -51,7 +54,13 @@ each member in members
 |     public #{name}() {}
 | 
 |     public #{name}(final Cursor cursor) {
-|         setId(cursor.getLong(cursor.getColumnIndex(#{name}Table.ID)));
+|         this(cursor, false);
+|     }
+| 
+|     public #{name}(final Cursor cursor, boolean prependTableName) {
+|         String prefix = prependTableName ? #{name}Table.TABLE_NAME + "_" : "";
+
+|         setId(cursor.getLong(cursor.getColumnIndex(prefix + #{name}Table.ID)));
 | 
 each member in members
   +setContentValues(member)

@@ -59,9 +59,22 @@ mixin queryCase(model)
  |                 break;
  | 
 
+mixin projectionMap(model, member)
+ |                     #{model.name}Table.TABLE_NAME + "." + #{model.name}Table.#{upperCase(member.name)} + " AS " + #{model.name}Table.TABLE_NAME + "_" + #{model.name}Table.#{upperCase(member.name)},
+ | 
+
 mixin queryCaseRelationship(relationship)
  |             case #{upperCase(relationship.parent)}_JOIN_#{upperCase(relationship.child)}_DIR:
  |                 queryBuilder.setTables(#{relationship.parent}Table.TABLE_NAME + " LEFT OUTER JOIN " + #{relationship.child}Table.TABLE_NAME + " ON (" + #{relationship.parent}Table.TABLE_NAME + "." + #{relationship.parent}Table.#{upperCase(relationship.join_column)} + "=" + #{relationship.child}Table.TABLE_NAME + "." + #{relationship.child}Table.#{upperCase(relationship.join_column)} + ")");
+ | 
+ |                 projection = new String[] {
+ - each model in models
+   - if (model.name == relationship.parent || model.name == relationship.child)
+     |                     #{model.name}Table.TABLE_NAME + "._id AS " + #{model.name}Table.TABLE_NAME + "__id",
+     | 
+     - each member in model.members
+       +projectionMap(model, member)
+ |                };
  |                 break;
  | 
 
@@ -71,6 +84,11 @@ mixin insertCase(model)
  |                     final long #{lowerCase(model.name)}Id = dbConnection.insertOrThrow(#{model.name}Table.TABLE_NAME, null, values);
  |                     final Uri new#{model.name}Uri = ContentUris.withAppendedId(#{upperCase(model.name)}_CONTENT_URI, #{lowerCase(model.name)}Id);
  |                     getContext().getContentResolver().notifyChange(new#{model.name}Uri, null);
+ - each relationship in relationships
+   - if (model.name == relationship.parent || model.name == relationship.child)
+     |                     getContext().getContentResolver().notifyChange(#{upperCase(relationship.parent)}_JOIN_#{upperCase(relationship.child)}_CONTENT_URI, null);
+     | 
+ | 
  |                     dbConnection.setTransactionSuccessful();
  |                     return new#{model.name}Uri;
  | 
@@ -78,12 +96,24 @@ mixin insertCase(model)
 mixin updateCase(model)
  |                case #{upperCase(model.name)}_DIR :
  |                    updateCount = dbConnection.update(#{model.name}Table.TABLE_NAME, values, selection, selectionArgs);
+ | 
+ - each relationship in relationships
+   - if (model.name == relationship.parent || model.name == relationship.child)
+     |                     joinUris.add(#{upperCase(relationship.parent)}_JOIN_#{upperCase(relationship.child)}_CONTENT_URI);
+     | 
+ | 
  |                    dbConnection.setTransactionSuccessful();
  |                    break;
  |                case #{upperCase(model.name)}_ID :
  |                    final long #{lowerCase(model.name)}Id = ContentUris.parseId(uri);
  |                    updateCount = dbConnection.update(#{model.name}Table.TABLE_NAME, values, 
  |                        #{model.name}Table.ID + "=" + #{lowerCase(model.name)}Id + (TextUtils.isEmpty(selection) ? "" : " AND (" + selection + ")"), selectionArgs);
+ | 
+ - each relationship in relationships
+   - if (model.name == relationship.parent || model.name == relationship.child)
+     |                     joinUris.add(#{upperCase(relationship.parent)}_JOIN_#{upperCase(relationship.child)}_CONTENT_URI);
+     | 
+ | 
  |                    dbConnection.setTransactionSuccessful();
  |                    break;
  | 
@@ -91,10 +121,22 @@ mixin updateCase(model)
 mixin deleteCase(model)
  |                 case #{upperCase(model.name)}_DIR :
  |                     deleteCount = dbConnection.delete(#{model.name}Table.TABLE_NAME, selection, selectionArgs);
+ | 
+ - each relationship in relationships
+   - if (model.name == relationship.parent || model.name == relationship.child)
+     |                     joinUris.add(#{upperCase(relationship.parent)}_JOIN_#{upperCase(relationship.child)}_CONTENT_URI);
+     | 
+ | 
  |                     dbConnection.setTransactionSuccessful();
  |                     break;
  |                 case #{upperCase(model.name)}_ID :
  |                     deleteCount = dbConnection.delete(#{model.name}Table.TABLE_NAME, #{model.name}Table.WHERE_ID_EQUALS, new String[] { uri.getLastPathSegment() });
+ | 
+ - each relationship in relationships
+   - if (model.name == relationship.parent || model.name == relationship.child)
+     |                     joinUris.add(#{upperCase(relationship.parent)}_JOIN_#{upperCase(relationship.child)}_CONTENT_URI);
+     | 
+ | 
  |                     dbConnection.setTransactionSuccessful();
  |                     break;
  | 
@@ -116,6 +158,9 @@ mixin deleteCase(model)
 | import android.database.Cursor;
 | import android.database.sqlite.SQLiteDatabase;
 | import android.net.Uri;
+| 
+| import java.util.ArrayList;
+| import java.util.List;
 | 
 | public class #{capitalize(camelCase(databaseName))}Provider extends ContentProvider {
 |     public static final String AUTHORITY = "#{packageName}.provider.#{databaseName}";
@@ -173,7 +218,7 @@ each relationship in relationships
 |     }
 | 
 |     @Override
-|     public final Cursor query(final Uri uri, final String[] projection, final String selection, final String[] selectionArgs, final String sortOrder) {
+|     public final Cursor query(final Uri uri, String[] projection, final String selection, final String[] selectionArgs, final String sortOrder) {
 |         final SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
 |         final SQLiteDatabase dbConnection = mDatabase.getReadableDatabase();
 | 
@@ -222,6 +267,7 @@ each model in models
 |     public final int update(final Uri uri, final ContentValues values, final String selection, final String[] selectionArgs) {
 |         final SQLiteDatabase dbConnection = mDatabase.getWritableDatabase();
 |         int updateCount = 0;
+|         List<Uri> joinUris = new ArrayList<Uri>();
 | 
 |         try {
 |             dbConnection.beginTransaction();
@@ -239,6 +285,10 @@ each model in models
 | 
 |         if (updateCount > 0) {
 |             getContext().getContentResolver().notifyChange(uri, null);
+| 
+|             for (Uri joinUri : joinUris) {
+|                 getContext().getContentResolver().notifyChange(joinUri, null);
+|             }
 |         }
 | 
 |         return updateCount;
@@ -249,6 +299,7 @@ each model in models
 |     public final int delete(final Uri uri, final String selection, final String[] selectionArgs) {
 |         final SQLiteDatabase dbConnection = mDatabase.getWritableDatabase();
 |         int deleteCount = 0;
+|         List<Uri> joinUris = new ArrayList<Uri>();
 | 
 |         try {
 |             dbConnection.beginTransaction();
@@ -266,6 +317,10 @@ each model in models
 | 
 |         if (deleteCount > 0) {
 |             getContext().getContentResolver().notifyChange(uri, null);
+| 
+|             for (Uri joinUri : joinUris) {
+|                 getContext().getContentResolver().notifyChange(joinUri, null);
+|             }
 |         }
 | 
 |         return deleteCount;
