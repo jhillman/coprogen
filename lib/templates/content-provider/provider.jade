@@ -99,7 +99,7 @@ mixin updateCase(model)
  | 
  - each relationship in relationships
    - if (model.name == relationship.parent || model.name == relationship.child)
-     |                     joinUris.add(#{upperCase(relationship.parent)}_JOIN_#{upperCase(relationship.child)}_CONTENT_URI);
+     |                    joinUris.add(#{upperCase(relationship.parent)}_JOIN_#{upperCase(relationship.child)}_CONTENT_URI);
      | 
  | 
  |                    dbConnection.setTransactionSuccessful();
@@ -111,7 +111,7 @@ mixin updateCase(model)
  | 
  - each relationship in relationships
    - if (model.name == relationship.parent || model.name == relationship.child)
-     |                     joinUris.add(#{upperCase(relationship.parent)}_JOIN_#{upperCase(relationship.child)}_CONTENT_URI);
+     |                    joinUris.add(#{upperCase(relationship.parent)}_JOIN_#{upperCase(relationship.child)}_CONTENT_URI);
      | 
  | 
  |                    dbConnection.setTransactionSuccessful();
