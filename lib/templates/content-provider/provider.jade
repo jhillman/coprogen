@@ -53,7 +53,7 @@ mixin typeCaseRelationship(relationship)
 
 mixin queryCase(model)
  |             case #{upperCase(model.name)}_ID:
- |                 queryBuilder.appendWhere(#{model.name}Table.ID + "=" + uri.getLastPathSegment());
+ |                 queryBuilder.appendWhere(#{model.name}Table._ID + "=" + uri.getLastPathSegment());
  |             case #{upperCase(model.name)}_DIR:
  |                 queryBuilder.setTables(#{model.name}Table.TABLE_NAME);
  |                 break;
@@ -65,7 +65,7 @@ mixin projectionMap(model, member)
 
 mixin queryCaseRelationship(relationship)
  |             case #{upperCase(relationship.parent)}_JOIN_#{upperCase(relationship.child)}_DIR:
- |                 queryBuilder.setTables(#{relationship.parent}Table.TABLE_NAME + " LEFT OUTER JOIN " + #{relationship.child}Table.TABLE_NAME + " ON (" + #{relationship.parent}Table.TABLE_NAME + "." + #{relationship.parent}Table.#{upperCase(relationship.join_column)} + "=" + #{relationship.child}Table.TABLE_NAME + "." + #{relationship.child}Table.#{upperCase(relationship.join_column)} + ")");
+ |                 queryBuilder.setTables(#{relationship.parent}Table.TABLE_NAME + " LEFT OUTER JOIN " + #{relationship.child}Table.TABLE_NAME + " ON (" + #{relationship.parent}Table.TABLE_NAME + "." + #{relationship.parent}Table.#{upperCase(relationship.parent_column)} + "=" + #{relationship.child}Table.TABLE_NAME + "." + #{relationship.child}Table.#{upperCase(relationship.child_column)} + ")");
  | 
  |                 projection = new String[] {
  - each model in models
@@ -107,7 +107,7 @@ mixin updateCase(model)
  |                case #{upperCase(model.name)}_ID :
  |                    final long #{lowerCase(model.name)}Id = ContentUris.parseId(uri);
  |                    updateCount = dbConnection.update(#{model.name}Table.TABLE_NAME, values, 
- |                        #{model.name}Table.ID + "=" + #{lowerCase(model.name)}Id + (TextUtils.isEmpty(selection) ? "" : " AND (" + selection + ")"), selectionArgs);
+ |                        #{model.name}Table._ID + "=" + #{lowerCase(model.name)}Id + (TextUtils.isEmpty(selection) ? "" : " AND (" + selection + ")"), selectionArgs);
  | 
  - each relationship in relationships
    - if (model.name == relationship.parent || model.name == relationship.child)

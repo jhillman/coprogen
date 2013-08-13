@@ -33,12 +33,12 @@ mixin plus()
 | public interface #{name}Table {
 |     String TABLE_NAME = "#{lowerCase(name)}";
 | 
-|     String ID = "_id"; 
+|     String _ID = "_id"; 
 | 
 each member in members
   +column(member)
 | 
-|     String[] ALL_COLUMNS = new String[] { ID,
+|     String[] ALL_COLUMNS = new String[] { _ID,
 each member, i in members
   +columnName(member)
   if i < members.length - 1
@@ -67,5 +67,5 @@ each member, i in members
 | 
 |     String SQL_DROP = "DROP TABLE IF EXISTS #{lowerCase(name)}";
 | 
-|     String WHERE_ID_EQUALS = ID + "=?";
+|     String WHERE_ID_EQUALS = _ID + "=?";
 |}

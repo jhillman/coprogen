@@ -44,7 +44,7 @@ mixin setContentValues(member)
 | import #{packageName}.database.table.#{name}Table;
 | 
 | public class #{name} {
-|     private long mId;
+|     private long mRowId;
 | 
 each member in members
   +member(member)
@@ -60,24 +60,22 @@ each member in members
 |     public #{name}(final Cursor cursor, boolean prependTableName) {
 |         String prefix = prependTableName ? #{name}Table.TABLE_NAME + "_" : "";
 
-|         setId(cursor.getLong(cursor.getColumnIndex(prefix + #{name}Table.ID)));
+|         setRowId(cursor.getLong(cursor.getColumnIndex(prefix + #{name}Table._ID)));
 | 
 each member in members
   +setContentValues(member)
 |    }
 | 
-|     /* Auto generated setters */
-|     public void setId(long id) {
-|         mId = id;
-|         mValues.put(#{name}Table.ID, id);
+|     public void setRowId(long _id) {
+|         mRowId = _id;
+|         mValues.put(#{name}Table._ID, _id);
 |     }
 | 
 each member in members
   +setter(member)
 |  
-|     /* Auto generated getters */
-|     public long getId() {
-|         return mId;
+|     public long getRowId() {
+|         return mRowId;
 |     }
 | 
 each member in members
