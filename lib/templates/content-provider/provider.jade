@@ -68,6 +68,8 @@ mixin queryCaseRelationship(relationship)
  |                 queryBuilder.setTables(#{relationship.parent}Table.TABLE_NAME + " LEFT OUTER JOIN " + #{relationship.child}Table.TABLE_NAME + " ON (" + #{relationship.parent}Table.TABLE_NAME + "." + #{relationship.parent}Table.#{upperCase(relationship.parent_column)} + "=" + #{relationship.child}Table.TABLE_NAME + "." + #{relationship.child}Table.#{upperCase(relationship.child_column)} + ")");
  | 
  |                 projection = new String[] {
+ |                     #{relationship.parent}Table.TABLE_NAME + "." + #{relationship.parent}Table._ID + " || " + #{relationship.child}Table.TABLE_NAME + "." + #{relationship.child}Table._ID + " AS " + #{relationship.parent}Table._ID,
+ | 
  - each model in models
    - if (model.name == relationship.parent || model.name == relationship.child)
      |                     #{model.name}Table.TABLE_NAME + "._id AS " + #{model.name}Table.TABLE_NAME + "__id",
