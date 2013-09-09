@@ -3,11 +3,11 @@ package com.example.database.table;
 public interface PlaceTable {
     String TABLE_NAME = "place";
  
-    String ID = "_id"; 
+    String _ID = "_id"; 
  
     String ADDRESS = "address"; 
   
-    String[] ALL_COLUMNS = new String[] { ID, ADDRESS };
+    String[] ALL_COLUMNS = new String[] { _ID, ADDRESS };
  
     String SQL_CREATE = "CREATE TABLE place ( _id INTEGER PRIMARY KEY AUTOINCREMENT, address TEXT )";
  
@@ -15,5 +15,5 @@ public interface PlaceTable {
  
     String SQL_DROP = "DROP TABLE IF EXISTS place";
  
-    String WHERE_ID_EQUALS = ID + "=?";
+    String WHERE_ID_EQUALS = _ID + "=?";
 }

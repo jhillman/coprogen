@@ -5,21 +5,27 @@ import android.database.Cursor;
 import com.example.database.table.PlaceTable;
  
 public class Place {
-    private long mId;
+    private long mRowId;
  
     private String mAddress; 
   
     private ContentValues mValues = new ContentValues();
  
+    public Place() {}
+ 
     public Place(final Cursor cursor) {
-        setId(cursor.getLong(cursor.getColumnIndex(PlaceTable.ID)));
-        setAddress(cursor.getString(cursor.getColumnIndex(PlaceTable.ADDRESS))); 
+        this(cursor, false);
     }
  
-    /* Auto generatted setters */
-    public void setId(long id) {
-        mId = id;
-        mValues.put(PlaceTable.ID, id);
+    public Place(final Cursor cursor, boolean prependTableName) {
+        String prefix = prependTableName ? PlaceTable.TABLE_NAME + "_" : "";
+        setRowId(cursor.getLong(cursor.getColumnIndex(prefix + PlaceTable._ID)));
+        setAddress(cursor.getString(cursor.getColumnIndex(prefix + PlaceTable.ADDRESS))); 
+    }
+ 
+    public void setRowId(long _id) {
+        mRowId = _id;
+        mValues.put(PlaceTable._ID, _id);
     }
  
     public void setAddress(String address) {
@@ -27,9 +33,8 @@ public class Place {
         mValues.put(PlaceTable.ADDRESS, address);
     }
   
-    /* Auto generated getters */
-    public long getId() {
-        return mId;
+    public long getRowId() {
+        return mRowId;
     }
  
     public String getAddress() {

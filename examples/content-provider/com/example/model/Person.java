@@ -5,7 +5,7 @@ import android.database.Cursor;
 import com.example.database.table.PersonTable;
  
 public class Person {
-    private long mId;
+    private long mRowId;
  
     private String mName; 
  
@@ -17,18 +17,24 @@ public class Person {
   
     private ContentValues mValues = new ContentValues();
  
+    public Person() {}
+ 
     public Person(final Cursor cursor) {
-        setId(cursor.getLong(cursor.getColumnIndex(PersonTable.ID)));
-        setName(cursor.getString(cursor.getColumnIndex(PersonTable.NAME))); 
-        setAge(cursor.getInt(cursor.getColumnIndex(PersonTable.AGE))); 
-        setAlive(cursor.isNull(cursor.getColumnIndex(PersonTable.ALIVE)) ? false : cursor.getInt(cursor.getColumnIndex(PersonTable.ALIVE)) != 0); 
-        setBodyFat(cursor.getDouble(cursor.getColumnIndex(PersonTable.BODY_FAT))); 
+        this(cursor, false);
     }
  
-    /* Auto generatted setters */
-    public void setId(long id) {
-        mId = id;
-        mValues.put(PersonTable.ID, id);
+    public Person(final Cursor cursor, boolean prependTableName) {
+        String prefix = prependTableName ? PersonTable.TABLE_NAME + "_" : "";
+        setRowId(cursor.getLong(cursor.getColumnIndex(prefix + PersonTable._ID)));
+        setName(cursor.getString(cursor.getColumnIndex(prefix + PersonTable.NAME))); 
+        setAge(cursor.getInt(cursor.getColumnIndex(prefix + PersonTable.AGE))); 
+        setAlive(cursor.isNull(cursor.getColumnIndex(prefix + PersonTable.ALIVE)) ? false : cursor.getInt(cursor.getColumnIndex(prefix + PersonTable.ALIVE)) != 0); 
+        setBodyFat(cursor.getDouble(cursor.getColumnIndex(prefix + PersonTable.BODY_FAT))); 
+    }
+ 
+    public void setRowId(long _id) {
+        mRowId = _id;
+        mValues.put(PersonTable._ID, _id);
     }
  
     public void setName(String name) {
@@ -51,9 +57,8 @@ public class Person {
         mValues.put(PersonTable.BODY_FAT, bodyFat);
     }
   
-    /* Auto generated getters */
-    public long getId() {
-        return mId;
+    public long getRowId() {
+        return mRowId;
     }
  
     public String getName() {

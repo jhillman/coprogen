@@ -16,6 +16,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
  
+import java.util.ArrayList;
+import java.util.List;
+ 
 public class PeopleAndPlacesProvider extends ContentProvider {
     public static final String AUTHORITY = "com.example.provider.people_and_places";
     public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
@@ -23,7 +26,7 @@ public class PeopleAndPlacesProvider extends ContentProvider {
     public static final Uri PERSON_CONTENT_URI = Uri.withAppendedPath(PeopleAndPlacesProvider.AUTHORITY_URI, PersonContent.CONTENT_PATH);
  
     public static final Uri PLACE_CONTENT_URI = Uri.withAppendedPath(PeopleAndPlacesProvider.AUTHORITY_URI, PlaceContent.CONTENT_PATH);
-  
+   
     private static final UriMatcher URI_MATCHER;
     private PeopleAndPlacesDatabase mDatabase;
  
@@ -32,7 +35,7 @@ public class PeopleAndPlacesProvider extends ContentProvider {
  
     private static final int PLACE_DIR = 2;
     private static final int PLACE_ID = 3;
-  
+   
     static {
         URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
  
@@ -41,22 +44,20 @@ public class PeopleAndPlacesProvider extends ContentProvider {
  
         URI_MATCHER.addURI(AUTHORITY, PlaceContent.CONTENT_PATH, PLACE_DIR);
         URI_MATCHER.addURI(AUTHORITY, PlaceContent.CONTENT_PATH + "/#",    PLACE_ID);
-    }
+     }
  
     public static final class PersonContent implements BaseColumns {
         public static final String CONTENT_PATH = "person";
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.people_and_places.person";
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.people_and_places.person";
-        public static final String[] ALL_COLUMNS = PersonTable.ALL_COLUMNS;
     }
  
     public static final class PlaceContent implements BaseColumns {
         public static final String CONTENT_PATH = "place";
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.people_and_places.place";
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.people_and_places.place";
-        public static final String[] ALL_COLUMNS = PlaceTable.ALL_COLUMNS;
     }
-  
+   
     @Override
     public final boolean onCreate() {
         mDatabase = new PeopleAndPlacesDatabase(getContext());
@@ -75,30 +76,30 @@ public class PeopleAndPlacesProvider extends ContentProvider {
                 return PlaceContent.CONTENT_TYPE;
             case PLACE_ID:
                 return PlaceContent.CONTENT_ITEM_TYPE;
-  
+   
             default:
                 throw new IllegalArgumentException("Unsupported URI: " + uri);
         }
     }
  
     @Override
-    public final Cursor query(final Uri uri, final String[] projection, final String selection, final String[] selectionArgs, final String sortOrder) {
+    public final Cursor query(final Uri uri, String[] projection, final String selection, final String[] selectionArgs, final String sortOrder) {
         final SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
         final SQLiteDatabase dbConnection = mDatabase.getReadableDatabase();
  
         switch (URI_MATCHER.match(uri)) {
             case PERSON_ID:
-                queryBuilder.appendWhere(PersonTable.ID + "=" + uri.getLastPathSegment());
+                queryBuilder.appendWhere(PersonTable._ID + "=" + uri.getLastPathSegment());
             case PERSON_DIR:
                 queryBuilder.setTables(PersonTable.TABLE_NAME);
                 break;
  
             case PLACE_ID:
-                queryBuilder.appendWhere(PlaceTable.ID + "=" + uri.getLastPathSegment());
+                queryBuilder.appendWhere(PlaceTable._ID + "=" + uri.getLastPathSegment());
             case PLACE_DIR:
                 queryBuilder.setTables(PlaceTable.TABLE_NAME);
                 break;
-  
+   
             default :
                 throw new IllegalArgumentException("Unsupported URI:" + uri);
         }
@@ -122,7 +123,7 @@ public class PeopleAndPlacesProvider extends ContentProvider {
                 case PERSON_ID:
                     final long personId = dbConnection.insertOrThrow(PersonTable.TABLE_NAME, null, values);
                     final Uri newPersonUri = ContentUris.withAppendedId(PERSON_CONTENT_URI, personId);
-                    getContext().getContentResolver().notifyChange(newPersonUri, null);
+                    getContext().getContentResolver().notifyChange(newPersonUri, null); 
                     dbConnection.setTransactionSuccessful();
                     return newPersonUri;
  
@@ -130,7 +131,7 @@ public class PeopleAndPlacesProvider extends ContentProvider {
                 case PLACE_ID:
                     final long placeId = dbConnection.insertOrThrow(PlaceTable.TABLE_NAME, null, values);
                     final Uri newPlaceUri = ContentUris.withAppendedId(PLACE_CONTENT_URI, placeId);
-                    getContext().getContentResolver().notifyChange(newPlaceUri, null);
+                    getContext().getContentResolver().notifyChange(newPlaceUri, null); 
                     dbConnection.setTransactionSuccessful();
                     return newPlaceUri;
   
@@ -150,6 +151,7 @@ public class PeopleAndPlacesProvider extends ContentProvider {
     public final int update(final Uri uri, final ContentValues values, final String selection, final String[] selectionArgs) {
         final SQLiteDatabase dbConnection = mDatabase.getWritableDatabase();
         int updateCount = 0;
+        List<Uri> joinUris = new ArrayList<Uri>();
  
         try {
             dbConnection.beginTransaction();
@@ -157,23 +159,27 @@ public class PeopleAndPlacesProvider extends ContentProvider {
             switch (URI_MATCHER.match(uri)) {
                case PERSON_DIR :
                    updateCount = dbConnection.update(PersonTable.TABLE_NAME, values, selection, selectionArgs);
+  
                    dbConnection.setTransactionSuccessful();
                    break;
                case PERSON_ID :
                    final long personId = ContentUris.parseId(uri);
                    updateCount = dbConnection.update(PersonTable.TABLE_NAME, values, 
-                       PersonTable.ID + "=" + personId + (TextUtils.isEmpty(selection) ? "" : " AND (" + selection + ")"), selectionArgs);
+                       PersonTable._ID + "=" + personId + (TextUtils.isEmpty(selection) ? "" : " AND (" + selection + ")"), selectionArgs);
+  
                    dbConnection.setTransactionSuccessful();
                    break;
  
                case PLACE_DIR :
                    updateCount = dbConnection.update(PlaceTable.TABLE_NAME, values, selection, selectionArgs);
+  
                    dbConnection.setTransactionSuccessful();
                    break;
                case PLACE_ID :
                    final long placeId = ContentUris.parseId(uri);
                    updateCount = dbConnection.update(PlaceTable.TABLE_NAME, values, 
-                       PlaceTable.ID + "=" + placeId + (TextUtils.isEmpty(selection) ? "" : " AND (" + selection + ")"), selectionArgs);
+                       PlaceTable._ID + "=" + placeId + (TextUtils.isEmpty(selection) ? "" : " AND (" + selection + ")"), selectionArgs);
+  
                    dbConnection.setTransactionSuccessful();
                    break;
   
@@ -186,6 +192,10 @@ public class PeopleAndPlacesProvider extends ContentProvider {
  
         if (updateCount > 0) {
             getContext().getContentResolver().notifyChange(uri, null);
+ 
+            for (Uri joinUri : joinUris) {
+                getContext().getContentResolver().notifyChange(joinUri, null);
+            }
         }
  
         return updateCount;
@@ -196,6 +206,7 @@ public class PeopleAndPlacesProvider extends ContentProvider {
     public final int delete(final Uri uri, final String selection, final String[] selectionArgs) {
         final SQLiteDatabase dbConnection = mDatabase.getWritableDatabase();
         int deleteCount = 0;
+        List<Uri> joinUris = new ArrayList<Uri>();
  
         try {
             dbConnection.beginTransaction();
@@ -203,19 +214,23 @@ public class PeopleAndPlacesProvider extends ContentProvider {
             switch (URI_MATCHER.match(uri)) {
                 case PERSON_DIR :
                     deleteCount = dbConnection.delete(PersonTable.TABLE_NAME, selection, selectionArgs);
+  
                     dbConnection.setTransactionSuccessful();
                     break;
                 case PERSON_ID :
                     deleteCount = dbConnection.delete(PersonTable.TABLE_NAME, PersonTable.WHERE_ID_EQUALS, new String[] { uri.getLastPathSegment() });
+  
                     dbConnection.setTransactionSuccessful();
                     break;
  
                 case PLACE_DIR :
                     deleteCount = dbConnection.delete(PlaceTable.TABLE_NAME, selection, selectionArgs);
+  
                     dbConnection.setTransactionSuccessful();
                     break;
                 case PLACE_ID :
                     deleteCount = dbConnection.delete(PlaceTable.TABLE_NAME, PlaceTable.WHERE_ID_EQUALS, new String[] { uri.getLastPathSegment() });
+  
                     dbConnection.setTransactionSuccessful();
                     break;
   
@@ -228,6 +243,10 @@ public class PeopleAndPlacesProvider extends ContentProvider {
  
         if (deleteCount > 0) {
             getContext().getContentResolver().notifyChange(uri, null);
+ 
+            for (Uri joinUri : joinUris) {
+                getContext().getContentResolver().notifyChange(joinUri, null);
+            }
         }
  
         return deleteCount;

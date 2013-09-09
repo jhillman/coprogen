@@ -2,6 +2,7 @@
   "type": "content-provider",
   "packageName": "com.example",
   "databaseName": "people_and_places",
+  "databaseVersion": 1,
   "models": [
     {
       "name": "Person",
@@ -33,5 +34,6 @@
         }
       ]
     }
-  ]
+  ],
+  "relationships": []
 }
