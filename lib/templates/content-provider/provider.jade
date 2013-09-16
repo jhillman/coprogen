@@ -165,7 +165,14 @@ mixin deleteCase(model)
 | import java.util.List;
 | 
 | public class #{capitalize(camelCase(databaseName))}Provider extends ContentProvider {
-|     public static final String AUTHORITY = "#{packageName}.provider.#{databaseName}";
+| 
+- if (typeof(authority) !== 'undefined')
+  |     public static final String AUTHORITY = "#{authority}";
+  | 
+- else
+  |     public static final String AUTHORITY = "#{packageName}.provider.#{databaseName}";
+  | 
+| 
 |     public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
 | 
 each model in models
