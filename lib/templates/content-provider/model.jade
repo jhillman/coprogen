@@ -1,5 +1,12 @@
 mixin member(member)
- |     private #{member.type} m#{camelCase(capitalize(member.name))}; 
+ - if (gson)
+   - if (typeof(member.serialized_name) !== 'undefined')
+     |     @SerializedName("#{member.serialized_name}") 
+     | 
+   - else
+     |     @SerializedName("#{member.name}") 
+     | 
+ |    private #{member.type} m#{camelCase(capitalize(member.name))}; 
  | 
 
 mixin setter(member)
@@ -61,6 +68,10 @@ mixin toParcel(member)
 - if (parcelable)
   | import android.os.Parcel;
   | import android.os.Parcelable;
+  | 
+| 
+- if (gson)
+  | import com.google.gson.annotations.SerializedName;
   | 
 | 
 | import #{packageName}.database.table.#{name}Table;

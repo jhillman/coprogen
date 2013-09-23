@@ -33,7 +33,8 @@
           "type": "String",
           "name": "address"
         }
-      ]
+      ],
+      "gson": true
     }
   ]
 }

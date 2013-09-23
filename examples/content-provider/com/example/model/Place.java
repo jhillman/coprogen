@@ -3,6 +3,8 @@ package com.example.model;
 import android.content.ContentValues;
 import android.database.Cursor;
   
+import com.google.gson.annotations.SerializedName;
+  
 import com.example.database.table.PlaceTable;
  
 import java.util.ArrayList;
@@ -11,6 +13,7 @@ import java.util.List;
 public class Place {
     private long mRowId;
  
+    @SerializedName("address") 
     private String mAddress; 
   
     private ContentValues mValues = new ContentValues();

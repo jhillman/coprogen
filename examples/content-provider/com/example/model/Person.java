@@ -5,7 +5,7 @@ import android.database.Cursor;
  
 import android.os.Parcel;
 import android.os.Parcelable;
-  
+   
 import com.example.database.table.PersonTable;
  
 import java.util.ArrayList;
@@ -13,13 +13,9 @@ import java.util.List;
  
 public class Person implements Parcelable {
     private long mRowId;
- 
     private String mName; 
- 
     private int mAge; 
- 
     private boolean mAlive; 
- 
     private double mBodyFat; 
   
     private ContentValues mValues = new ContentValues();
