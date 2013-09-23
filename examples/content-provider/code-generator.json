@@ -23,7 +23,8 @@
           "type" : "double",
           "name" : "body_fat"
         }
-      ]
+      ],
+      "parcelable": true
     },
     {
       "name": "Place",

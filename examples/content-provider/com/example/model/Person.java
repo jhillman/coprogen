@@ -2,12 +2,16 @@ package com.example.model;
  
 import android.content.ContentValues;
 import android.database.Cursor;
+ 
+import android.os.Parcel;
+import android.os.Parcelable;
+  
 import com.example.database.table.PersonTable;
  
 import java.util.ArrayList;
 import java.util.List;
  
-public class Person {
+public class Person implements Parcelable {
     private long mRowId;
  
     private String mName; 
@@ -35,6 +39,46 @@ public class Person {
         setBodyFat(cursor.getDouble(cursor.getColumnIndex(prefix + PersonTable.BODY_FAT))); 
     }
  
+    public Person(Parcel parcel) {
+        mRowId = parcel.readLong();
+ 
+        setName(parcel.readString()); 
+ 
+        setAge(parcel.readInt()); 
+ 
+        setAlive(parcel.readInt() == 0); 
+ 
+        setBodyFat(parcel.readDouble()); 
+    }
+    
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+ 
+    @Override
+    public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeLong(mRowId);
+ 
+        parcel.writeString(getName()); 
+ 
+        parcel.writeInt(getAge()); 
+ 
+        parcel.writeInt(getAlive() ? 1 : 0); 
+ 
+        parcel.writeDouble(getBodyFat()); 
+    }
+ 
+    public static final Creator<Person> CREATOR = new Creator<Person>() {
+        public Person createFromParcel(Parcel in) {
+            return new Person(in);
+        }
+ 
+        public Person[] newArray(int size) {
+            return new Person[size];
+        }
+    };
+  
     public void setRowId(long _id) {
         mRowId = _id;
         mValues.put(PersonTable._ID, _id);

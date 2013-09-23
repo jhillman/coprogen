@@ -37,17 +37,44 @@ mixin setContentValues(member)
   | ))); 
   | 
 
+mixin fromParcel(member)
+ - if (member.type === 'boolean')
+  |         set#{camelCase(capitalize(member.name))}(parcel.readInt() == 0); 
+  | 
+ - else
+  |         set#{camelCase(capitalize(member.name))}(parcel.read#{capitalize(member.type)}()); 
+  | 
+
+mixin toParcel(member)
+ - if (member.type === 'boolean')
+  |         parcel.writeInt(get#{camelCase(capitalize(member.name))}() ? 1 : 0); 
+  | 
+ - else
+  |         parcel.write#{capitalize(member.type)}(get#{camelCase(capitalize(member.name))}()); 
+  | 
+
 | package #{packageName}.model;
 | 
 | import android.content.ContentValues;
 | import android.database.Cursor;
+| 
+- if (parcelable)
+  | import android.os.Parcel;
+  | import android.os.Parcelable;
+  | 
+| 
 | import #{packageName}.database.table.#{name}Table;
 | 
 | import java.util.ArrayList;
 | import java.util.List;
 | 
-| public class #{name} {
-|     private long mRowId;
+- if (parcelable)
+  | public class #{name} implements Parcelable {
+  | 
+- else
+  | public class #{name} {
+  | 
+|    private long mRowId;
 | 
 each member in members
   +member(member)
@@ -68,6 +95,38 @@ each member in members
 each member in members
   +setContentValues(member)
 |    }
+| 
+- if (parcelable)
+  |     public #{name}(Parcel parcel) {
+  |         mRowId = parcel.readLong();
+  | 
+  each member in members
+    +fromParcel(member)
+  |    }
+  |     
+  |     @Override
+  |     public int describeContents() {
+  |         return 0;
+  |     }
+  | 
+  |     @Override
+  |     public void writeToParcel(Parcel parcel, int flags) {
+  |         parcel.writeLong(mRowId);
+  | 
+  each member in members
+    +toParcel(member)
+  |    }
+  | 
+  |     public static final Creator<#{name}> CREATOR = new Creator<#{name}>() {
+  |         public #{name} createFromParcel(Parcel in) {
+  |             return new #{name}(in);
+  |         }
+  | 
+  |         public #{name}[] newArray(int size) {
+  |             return new #{name}[size];
+  |         }
+  |     };
+  | 
 | 
 |     public void setRowId(long _id) {
 |         mRowId = _id;

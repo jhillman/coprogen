@@ -2,6 +2,7 @@ package com.example.model;
  
 import android.content.ContentValues;
 import android.database.Cursor;
+  
 import com.example.database.table.PlaceTable;
  
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class Place {
         setRowId(cursor.getLong(cursor.getColumnIndex(prefix + PlaceTable._ID)));
         setAddress(cursor.getString(cursor.getColumnIndex(prefix + PlaceTable.ADDRESS))); 
     }
- 
+  
     public void setRowId(long _id) {
         mRowId = _id;
         mValues.put(PlaceTable._ID, _id);
