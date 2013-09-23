@@ -1,1 +1,1 @@
-<provider android:name="com.example.provider.PeopleAndPlacesProvider" android:authorities="com.example.provider.people_and_places" />
+<provider android:name="com.example.provider.PeopleAndPlacesProvider" android:authorities="com.example.provider.people_and_places" android:exported="false" />

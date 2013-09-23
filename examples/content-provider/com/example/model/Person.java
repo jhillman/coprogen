@@ -4,6 +4,9 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import com.example.database.table.PersonTable;
  
+import java.util.ArrayList;
+import java.util.List;
+ 
 public class Person {
     private long mRowId;
  
@@ -80,4 +83,20 @@ public class Person {
     public ContentValues getContentValues() {
         return mValues;
     }
+  
+    public static List<Person> listFromCursor(Cursor cursor) {
+        List<Person> list = new ArrayList<Person>();
+ 
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                list.add(new Person(cursor));
+            } while (cursor.moveToNext());
+        }
+ 
+        return list;
+    }
+ 
+    // BEGIN PERSISTED SECTION - put custom methods here
+
+    // END PERSISTED SECTION
 }

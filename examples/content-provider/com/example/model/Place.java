@@ -4,6 +4,9 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import com.example.database.table.PlaceTable;
  
+import java.util.ArrayList;
+import java.util.List;
+ 
 public class Place {
     private long mRowId;
  
@@ -44,4 +47,20 @@ public class Place {
     public ContentValues getContentValues() {
         return mValues;
     }
+  
+    public static List<Place> listFromCursor(Cursor cursor) {
+        List<Place> list = new ArrayList<Place>();
+ 
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                list.add(new Place(cursor));
+            } while (cursor.moveToNext());
+        }
+ 
+        return list;
+    }
+ 
+    // BEGIN PERSISTED SECTION - put custom methods here
+
+    // END PERSISTED SECTION
 }

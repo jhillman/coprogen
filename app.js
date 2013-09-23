@@ -16,6 +16,10 @@ var generatorMap = {
 fs.exists(process.cwd() + '/code-generator.json', function(exists) {
   if (exists) {
     templateData = require(process.cwd() + '/code-generator');
+    if (!templateData.relationships) {
+      templateData.relationships = [];
+    }
+
     generatorMap[templateData.type](process.cwd(), templateData, function(err) {
       if (err) console.log('error: ' + err);
 

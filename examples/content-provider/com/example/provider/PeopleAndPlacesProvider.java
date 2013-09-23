@@ -20,7 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
  
 public class PeopleAndPlacesProvider extends ContentProvider {
+ 
     public static final String AUTHORITY = "com.example.provider.people_and_places";
+  
     public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
  
     public static final Uri PERSON_CONTENT_URI = Uri.withAppendedPath(PeopleAndPlacesProvider.AUTHORITY_URI, PersonContent.CONTENT_PATH);
