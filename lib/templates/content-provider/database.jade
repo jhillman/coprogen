@@ -43,7 +43,7 @@ each model in models
 |     // BEGIN PERSISTED SECTION - put custom methods here
 - if (persistedSection === '')
   |     // you may change the contents of this method, but do not rename/remove it
-  |     private void upgrade(db, final int oldVersion, final int newVersion) {
+  |     private void upgrade(final SQLiteDatabase db, final int oldVersion, final int newVersion) {
   |         dropTablesAndCreate(db);
   |     }
   | 
