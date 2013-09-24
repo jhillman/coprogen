@@ -1,24 +1,46 @@
 {
-  "name": "CodeGenerator",
-  "version": "0.0.1",
+  "name": "codegen",
   "description": "A powerful, flexible, language-agnostic, boilerplate-vanquishing code generation toolkit forged from pure awesomeness.",
-  "main": "app.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "version": "0.0.1",
+  "homepage": "https://github.com/mediarain/CodeGenerator",
+  "author": {
+    "name": "Jeff Hillman",
+    "email": "jeffh@mediarain.com"
   },
   "repository": {
     "type": "git",
     "url": "git://github.com/mediarain/CodeGenerator.git"
   },
-  "author": "Jeff Hillman",
-  "license": "BSD",
-  "readmeFilename": "README.md",
-  "gitHead": "1ed6cd4136cfdce765a3e1007c0dad1994850a22",
-  "dependencies": {
+  "bugs": {
+    "url": "https://github.com/mediarain/CodeGenerator/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/mediarain/CodeGenerator/blob/master/LICENSE-MIT"
+    }
+  ],
+  "main": "codegen",
+  "preferGlobal": "true",
+  "bin": {
+    "codegen" : "codegen.js"
+  },
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "scripts": {
+    "test": "grunt nodeunit"
+  },
+  "devDependencies": {
+    "grunt-contrib-jshint": "~0.6.4",
+    "grunt-contrib-nodeunit": "~0.2.0",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt": "~0.4.1",
     "jade": "~0.30.0",
     "stewardess": "~0.2.2",
     "waitress": "~0.1.5",
     "path": "~0.4.9",
     "optimist": "~0.5.2"
-  }
+  },
+  "keywords": []
 }
