@@ -48,7 +48,7 @@ function processData(destination, templateData) {
 };
 
 usage = function() {
-  console.log('\nUsage:\n\nRun from a directory that contains a code-generator.json file, or provide the path as an argument:\n' +
+  console.log('\nCodeGenerator Usage:\n\nRun from a directory that contains a code-generator.json file, or provide the path as an argument:\n' +
               '  codegen --path <relative path to content-provider.json>\n\n' +
               'You may also provide the destination directory as an argument:\n' +
               '  codegen --dest <relative path to the destination directory>\n\n' +
