@@ -30,8 +30,14 @@ processorMap = {
 };
 
 function processData(destination, templateData) {
+  var dataJson;
+
   if (argv.data) {
-    var dataJson = JSON.parse(argv.data);
+    if (fs.existsSync(argv.data)) {
+      dataJson = require(process.cwd() + '/' + argv.data);
+    } else {
+      dataJson = JSON.parse(argv.data);
+    }
 
     for (var key in dataJson) {
       templateData[key] = dataJson[key];
@@ -53,7 +59,8 @@ usage = function() {
               'You may also provide the destination directory as an argument:\n' +
               '  codegen --dest <relative path to the destination directory>\n\n' +
               'Finally, you may also override or provide additional template data with the data parameter:\n' +
-              '  codegen --data \'{"authority": "com.custom.authority"}\'');
+              '  codegen --data \'{"authority": "com.custom.authority"}\'\n'+
+              '  codegen --data <relative path to .json file>');
   process.exit(1);
 };
 
