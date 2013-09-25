@@ -8,7 +8,6 @@ var fs = require('fs'),
     generator,
     generatorMap,
     processorMap,
-    processor,
     destinationPath = process.cwd(),
     templateDataPath = process.cwd() + '/code-generator.json',
     templateData,
@@ -30,7 +29,7 @@ processorMap = {
   }
 };
 
-processor = function(destination, templateData) {
+function processData(destination, templateData) {
   if (argv.data) {
     var dataJson = JSON.parse(argv.data);
 
@@ -41,9 +40,9 @@ processor = function(destination, templateData) {
 
   processorMap[templateData.type](destination, templateData, function(destination, templateData) {
     generatorMap[templateData.type](destination, templateData, function(err) {
-      if (err) console.log('error: ' + err);
+      if (err) console.log('CodeGenerator error: ' + err);
 
-      console.log('done!');
+      console.log('CodeGenerater has completed successfully!');
     });
   });
 };
@@ -70,7 +69,7 @@ fs.exists(templateDataPath, function(exists) {
   if (exists) {
     templateData = require(templateDataPath);
 
-    processor(destinationPath, templateData);
+    processData(destinationPath, templateData);
   } else {
     usage();
   }
