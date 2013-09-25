@@ -3,7 +3,8 @@
 A powerful, flexible, language-agnostic, boilerplate-vanquishing code generation toolkit forged from pure awesomeness.
 
 ## Getting Started
-Install the module with: `npm install codegen`
+Install CodeGenerator with: `npm install`
+Link the command line tool with: `npm link`
 
 ## Documentation
 _(Coming soon)_
