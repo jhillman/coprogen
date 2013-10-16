@@ -9,11 +9,11 @@ $ npm install
 ```
 Link the command line tool (codegen):
 ```bash
-npm link
+$ npm link
 ```
 Run `codegen` in the directory that contains your code-generator.json file:
 ```bash
-codegen
+$ codegen
 ```
 
 ## Contributing
