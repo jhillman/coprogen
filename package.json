@@ -14,12 +14,6 @@
   "bugs": {
     "url": "https://github.com/mediarain/CodeGenerator/issues"
   },
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "https://github.com/mediarain/CodeGenerator/blob/master/LICENSE-MIT"
-    }
-  ],
   "main": "codegen",
   "preferGlobal": "true",
   "bin": {

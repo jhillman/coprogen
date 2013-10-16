@@ -5,19 +5,10 @@ A powerful, flexible, language-agnostic, boilerplate-vanquishing code generation
 ## Getting Started
 Install CodeGenerator with: `npm install`
 Link the command line tool with: `npm link`
-
-## Documentation
-_(Coming soon)_
-
-## Examples
-_(Coming soon)_
+Run `codegen` in the directory that contains your code-generator.json file
 
 ## Contributing
-In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
-
-## Release History
-_(Nothing yet)_
+In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## License
 Copyright (c) 2013 Jeff Hillman  
-Licensed under the MIT license.
