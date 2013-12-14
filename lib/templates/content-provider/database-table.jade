@@ -38,7 +38,7 @@ mixin plus()
 each member in members
   +column(member)
 | 
-|     String[] ALL_COLUMNS = new String[] { _ID,
+|     final String[] ALL_COLUMNS = new String[] { _ID,
 each member, i in members
   +columnName(member)
   if i < members.length - 1

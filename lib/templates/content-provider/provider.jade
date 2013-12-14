@@ -25,7 +25,7 @@ mixin uriMatcherRelationship(relationship)
  | 
 
 mixin contentColumns(model)
- |     public static final class #{model.name}Content implements BaseColumns {
+ |     public static interface #{model.name}Content extends BaseColumns {
  |         public static final String CONTENT_PATH = "#{lowerCase(model.name)}";
  |         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.#{databaseName}.#{lowerCase(model.name)}";
  |         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.#{databaseName}.#{lowerCase(model.name)}";
@@ -54,6 +54,7 @@ mixin typeCaseRelationship(relationship)
 mixin queryCase(model)
  |             case #{upperCase(model.name)}_ID:
  |                 queryBuilder.appendWhere(#{model.name}Table._ID + "=" + uri.getLastPathSegment());
+ |                 break;
  |             case #{upperCase(model.name)}_DIR:
  |                 queryBuilder.setTables(#{model.name}Table.TABLE_NAME);
  |                 break;
@@ -153,6 +154,7 @@ mixin deleteCase(model)
 | import android.text.TextUtils;
 | import android.content.ContentUris;
 | import android.database.sqlite.SQLiteQueryBuilder;
+| import android.util.Log;
 | 
 | import android.content.ContentProvider;
 | import android.content.ContentValues;
@@ -174,6 +176,7 @@ mixin deleteCase(model)
   | 
 | 
 |     public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
+|     public static final String TAG = "#{capitalize(camelCase(databaseName))}Provider";
 | 
 each model in models
  +contentUri(model)
@@ -264,7 +267,7 @@ each model in models
 |                     throw new IllegalArgumentException("Unsupported URI:" + uri);
 |             }
 |         } catch (Exception e) {
-|             e.printStackTrace();
+|             Log.e(TAG, e.getMessage(), e);
 |         } finally {
 |             dbConnection.endTransaction();
 |         }

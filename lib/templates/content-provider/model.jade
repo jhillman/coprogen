@@ -10,7 +10,7 @@ mixin member(member)
  | 
 
 mixin setter(member)
- |     public void set#{camelCase(capitalize(member.name))}(#{member.type} #{camelCase(member.name)}) {
+ |     public final void set#{camelCase(capitalize(member.name))}(#{member.type} #{camelCase(member.name)}) {
  |         m#{camelCase(capitalize(member.name))} = #{camelCase(member.name)};
  |         mValues.put(
  +getTableValue(member)
@@ -139,7 +139,7 @@ each member in members
   |     };
   | 
 | 
-|     public void setRowId(long _id) {
+|     public final void setRowId(long _id) {
 |         mRowId = _id;
 |         mValues.put(#{name}Table._ID, _id);
 |     }
