@@ -13,10 +13,13 @@ mixin sqlDrop(model)
 | import android.content.Context;
 | import android.database.sqlite.SQLiteDatabase;
 | import android.database.sqlite.SQLiteOpenHelper;
+| 
+| import android.util.Log;
 |  
 | public class #{capitalize(camelCase(databaseName))}Database extends SQLiteOpenHelper {
 |     private static final String DATABASE_NAME = "#{databaseName}.db";
 |     private static final int DATABASE_VERSION = #{databaseVersion};
+|     public static final String TAG = "#{capitalize(camelCase(databaseName))}Database";
 | 
 |     public #{capitalize(camelCase(databaseName))}Database(final Context context) {
 |         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -44,11 +47,12 @@ each model in models
 - if (persistedSection === '')
   |     // you may change the contents of this method, but do not rename/remove it
   |     private void upgrade(final SQLiteDatabase db, final int oldVersion, final int newVersion) {
+  |         Log.e(TAG, ="Updating database from version " + oldVersion + " to " + newVersion + ".");
   |         dropTablesAndCreate(db);
   |     }
   | 
 - else
-  | #{persistedSection}
+  | !{persistedSection}
   | 
 |    // END PERSISTED SECTION
 |}

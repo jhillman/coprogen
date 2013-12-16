@@ -10,7 +10,6 @@ mixin constant(model, i)
  |     private static final int #{upperCase(model.name)}_DIR = #{i * 2};
  |     private static final int #{upperCase(model.name)}_ID = #{(i * 2) + 1};
  | 
-
 mixin constantRelationship(relationship, i)
  |     private static final int #{upperCase(relationship.parent)}_JOIN_#{upperCase(relationship.child)}_DIR = #{i * 2};
  | 
@@ -25,7 +24,9 @@ mixin uriMatcherRelationship(relationship)
  | 
 
 mixin contentColumns(model)
- |     public static interface #{model.name}Content extends BaseColumns {
+ |     private static class #{model.name}Content implements BaseColumns {
+ |         private #{model.name}Content() {}
+ | 
  |         public static final String CONTENT_PATH = "#{lowerCase(model.name)}";
  |         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.#{databaseName}.#{lowerCase(model.name)}";
  |         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.#{databaseName}.#{lowerCase(model.name)}";
@@ -92,7 +93,6 @@ mixin insertCase(model)
      |                     getContext().getContentResolver().notifyChange(#{upperCase(relationship.parent)}_JOIN_#{upperCase(relationship.child)}_CONTENT_URI, null);
      | 
  | 
- |                     dbConnection.setTransactionSuccessful();
  |                     return new#{model.name}Uri;
  | 
 
@@ -105,7 +105,6 @@ mixin updateCase(model)
      |                    joinUris.add(#{upperCase(relationship.parent)}_JOIN_#{upperCase(relationship.child)}_CONTENT_URI);
      | 
  | 
- |                    dbConnection.setTransactionSuccessful();
  |                    break;
  |                case #{upperCase(model.name)}_ID :
  |                    final long #{lowerCase(model.name)}Id = ContentUris.parseId(uri);
@@ -117,7 +116,6 @@ mixin updateCase(model)
      |                    joinUris.add(#{upperCase(relationship.parent)}_JOIN_#{upperCase(relationship.child)}_CONTENT_URI);
      | 
  | 
- |                    dbConnection.setTransactionSuccessful();
  |                    break;
  | 
 
@@ -130,7 +128,6 @@ mixin deleteCase(model)
      |                     joinUris.add(#{upperCase(relationship.parent)}_JOIN_#{upperCase(relationship.child)}_CONTENT_URI);
      | 
  | 
- |                     dbConnection.setTransactionSuccessful();
  |                     break;
  |                 case #{upperCase(model.name)}_ID :
  |                     deleteCount = dbConnection.delete(#{model.name}Table.TABLE_NAME, #{model.name}Table.WHERE_ID_EQUALS, new String[] { uri.getLastPathSegment() });
@@ -140,7 +137,6 @@ mixin deleteCase(model)
      |                     joinUris.add(#{upperCase(relationship.parent)}_JOIN_#{upperCase(relationship.child)}_CONTENT_URI);
      | 
  | 
- |                     dbConnection.setTransactionSuccessful();
  |                     break;
  | 
 
@@ -269,6 +265,7 @@ each model in models
 |         } catch (Exception e) {
 |             Log.e(TAG, e.getMessage(), e);
 |         } finally {
+|             dbConnection.setTransactionSuccessful();
 |             dbConnection.endTransaction();
 |         }
 | 
@@ -292,6 +289,7 @@ each model in models
 |                     throw new IllegalArgumentException("Unsupported URI:" + uri);
 |             }
 |         } finally {
+|             dbConnection.setTransactionSuccessful();
 |             dbConnection.endTransaction();
 |         }
 | 
@@ -324,6 +322,7 @@ each model in models
 |                     throw new IllegalArgumentException("Unsupported URI:" + uri);
 |             }
 |         } finally {
+|             dbConnection.setTransactionSuccessful();
 |             dbConnection.endTransaction();
 |         }
 | 
