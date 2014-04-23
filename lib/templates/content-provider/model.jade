@@ -60,6 +60,10 @@ mixin toParcel(member)
   |         parcel.write#{capitalize(member.type)}(get#{camelCase(capitalize(member.name))}()); 
   | 
 
+mixin setMember(member)
+  |         set#{camelCase(capitalize(member.name))}(m#{camelCase(capitalize(member.name))}); 
+  | 
+
 | package #{packageName}.model;
 | 
 | import android.content.ContentValues;
@@ -154,7 +158,14 @@ each member in members
 each member in members
   +getter(member)
 |   
+|     private void updateContentValues() {
+each member in members
+  +setMember(member)
+|     }
+|   
 |     public ContentValues getContentValues() {
+|         updateContentValues();
+| 
 |         return mValues;
 |     }
 |   
