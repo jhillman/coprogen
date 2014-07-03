@@ -6,20 +6,20 @@ mixin member(member)
    - else
      |     @SerializedName("#{member.name}") 
      | 
- |    private #{member.type} m#{camelCase(capitalize(member.name))}; 
+ |    private #{member.class || member.type} m#{camelCase(capitalize(member.name))}; 
  | 
 
 mixin setter(member)
- |     public final void set#{camelCase(capitalize(member.name))}(#{member.type} #{camelCase(member.name)}) {
+ |     public final void set#{camelCase(capitalize(member.name))}(#{member.class || member.type} #{camelCase(member.name)}) {
  |         m#{camelCase(capitalize(member.name))} = #{camelCase(member.name)};
  |         mValues.put(
  +getTableValue(member)
- | , #{camelCase(member.name)});
+ | , #{camelCase(member.name) + (member.class ? '.name()' : '')});
  |     }
  | 
 
 mixin getter(member)
- |     public #{member.type} get#{camelCase(capitalize(member.name))}() {
+ |     public #{member.class || member.type} get#{camelCase(capitalize(member.name))}() {
  |         return m#{camelCase(capitalize(member.name))};
  |     }
  | 
@@ -38,6 +38,11 @@ mixin setContentValues(member)
   +getTableValueWithPrefix(member)
   | )) != 0); 
   | 
+ - else if (member.type === 'enum')
+  |        set#{camelCase(capitalize(member.name))}(#{member.class}.valueOf(cursor.getString(cursor.getColumnIndex(
+  +getTableValueWithPrefix(member)
+  | )))); 
+  | 
  - else
   |        set#{camelCase(capitalize(member.name))}(cursor.get#{capitalize(member.type)}(cursor.getColumnIndex(
   +getTableValueWithPrefix(member)
@@ -48,6 +53,9 @@ mixin fromParcel(member)
  - if (member.type === 'boolean')
   |         set#{camelCase(capitalize(member.name))}(parcel.readInt() == 0); 
   | 
+ - else if (member.type === 'enum')
+  |         set#{camelCase(capitalize(member.name))}(#{member.class}.valueOf(parcel.readString())); 
+  | 
  - else
   |         set#{camelCase(capitalize(member.name))}(parcel.read#{capitalize(member.type)}()); 
   | 
@@ -56,12 +64,11 @@ mixin toParcel(member)
  - if (member.type === 'boolean')
   |         parcel.writeInt(get#{camelCase(capitalize(member.name))}() ? 1 : 0); 
   | 
+ - else if (member.type == 'enum')
+  |         parcel.writeString(get#{camelCase(capitalize(member.name))}().name()); 
+  | 
  - else
   |         parcel.write#{capitalize(member.type)}(get#{camelCase(capitalize(member.name))}()); 
-  | 
-
-mixin setMember(member)
-  |         set#{camelCase(capitalize(member.name))}(m#{camelCase(capitalize(member.name))}); 
   | 
 
 | package #{packageName}.model;
@@ -158,14 +165,7 @@ each member in members
 each member in members
   +getter(member)
 |   
-|     private void updateContentValues() {
-each member in members
-  +setMember(member)
-|     }
-|   
 |     public ContentValues getContentValues() {
-|         updateContentValues();
-| 
 |         return mValues;
 |     }
 |   
