@@ -6,11 +6,11 @@ mixin member(member)
    - else
      |     @SerializedName("#{member.name}") 
      | 
- |    private #{member.class || member.type} m#{camelCase(capitalize(member.name))}; 
+ |    private #{enumMap[member.class] || member.type} m#{camelCase(capitalize(member.name))}; 
  | 
 
 mixin setter(member)
- |     public final void set#{camelCase(capitalize(member.name))}(#{member.class || member.type} #{camelCase(member.name)}) {
+ |     public final void set#{camelCase(capitalize(member.name))}(#{enumMap[member.class] || member.type} #{camelCase(member.name)}) {
  |         m#{camelCase(capitalize(member.name))} = #{camelCase(member.name)};
  |         mValues.put(
  +getTableValue(member)
@@ -19,7 +19,7 @@ mixin setter(member)
  | 
 
 mixin getter(member)
- |     public #{member.class || member.type} get#{camelCase(capitalize(member.name))}() {
+ |     public #{enumMap[member.class] || member.type} get#{camelCase(capitalize(member.name))}() {
  |         return m#{camelCase(capitalize(member.name))};
  |     }
  | 
@@ -39,7 +39,7 @@ mixin setContentValues(member)
   | )) != 0); 
   | 
  - else if (member.type === 'enum')
-  |        set#{camelCase(capitalize(member.name))}(#{member.class}.valueOf(cursor.getString(cursor.getColumnIndex(
+  |        set#{camelCase(capitalize(member.name))}(#{enumMap[member.class]}.valueOf(cursor.getString(cursor.getColumnIndex(
   +getTableValueWithPrefix(member)
   | )))); 
   | 
@@ -54,7 +54,7 @@ mixin fromParcel(member)
   |         set#{camelCase(capitalize(member.name))}(parcel.readInt() == 0); 
   | 
  - else if (member.type === 'enum')
-  |         set#{camelCase(capitalize(member.name))}(#{member.class}.valueOf(parcel.readString())); 
+  |         set#{camelCase(capitalize(member.name))}(#{enumMap[member.class]}.valueOf(parcel.readString())); 
   | 
  - else
   |         set#{camelCase(capitalize(member.name))}(parcel.read#{capitalize(member.type)}()); 
@@ -71,6 +71,10 @@ mixin toParcel(member)
   |         parcel.write#{capitalize(member.type)}(get#{camelCase(capitalize(member.name))}()); 
   | 
 
+mixin importEnum(enumName)
+ | import #{enumName};
+ | 
+
 | package #{packageName}.model;
 | 
 | import android.content.ContentValues;
@@ -85,7 +89,10 @@ mixin toParcel(member)
   | import com.google.gson.annotations.SerializedName;
   | 
 | 
-| import #{packageName}.database.table.#{name}Table;
+| import #{packageName}.database.table.#{name}Table; 
+| 
+each enumName in enums
+  +importEnum(enumName)
 | 
 | import java.util.ArrayList;
 | import java.util.List;
