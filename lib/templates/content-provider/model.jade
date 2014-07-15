@@ -51,7 +51,7 @@ mixin setContentValues(member)
 
 mixin fromParcel(member)
  - if (member.type === 'boolean')
-  |         set#{camelCase(capitalize(member.name))}(parcel.readInt() == 0); 
+  |         set#{camelCase(capitalize(member.name))}(parcel.readInt() == 1); 
   | 
  - else if (member.type === 'enum')
   |         set#{camelCase(capitalize(member.name))}(#{enumMap[member.class]}.valueOf(parcel.readString())); 

@@ -2,17 +2,17 @@
   "name": "codegen",
   "description": "A powerful, flexible, language-agnostic, boilerplate-vanquishing code generation toolkit forged from pure awesomeness.",
   "version": "0.0.1",
-  "homepage": "https://github.com/mediarain/CodeGenerator",
+  "homepage": "https://github.com/jhillman/CodeGenerator",
   "author": {
     "name": "Jeff Hillman",
-    "email": "jeffh@mediarain.com"
+    "email": "jeff.hillman@gmail.com"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/mediarain/CodeGenerator.git"
+    "url": "git://github.com/jhillman/CodeGenerator.git"
   },
   "bugs": {
-    "url": "https://github.com/mediarain/CodeGenerator/issues"
+    "url": "https://github.com/jhillman/CodeGenerator/issues"
   },
   "main": "codegen",
   "preferGlobal": "true",
