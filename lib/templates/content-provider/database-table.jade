@@ -58,9 +58,9 @@ each relationship in relationships
   if (name == relationship.child)
     +comma() 
     |  FOREIGN KEY(#{relationship.child_column}) REFERENCES #{lowerCase(relationship.parent)}(#{relationship.parent_column}) 
-    if(relationship.on_update)
+    if (relationship.on_update)
       | ON UPDATE #{upperCase(relationship.on_update)} 
-    if(relationship.on_delete)
+    if (relationship.on_delete)
       | ON DELETE #{upperCase(relationship.on_delete)} 
 |  )";
 | 
