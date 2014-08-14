@@ -42,7 +42,7 @@ each model in models
 |     public void onOpen(SQLiteDatabase db) {
 |       super.onOpen(db);
 if relationships.length>0
-  +sqlPragmaForeingKeyOn()
+  +sqlPragmaForeignKeyOn()
 |     }
 | 
 |     private final void dropTablesAndCreate(final SQLiteDatabase db) {
