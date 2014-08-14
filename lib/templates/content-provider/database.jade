@@ -5,7 +5,7 @@ mixin sqlCreate(model)
 mixin sqlDrop(model)
  |         db.execSQL(#{model.name}Table.SQL_DROP);
  | 
-mixin sqlPragmaForeingKeyOn()
+mixin sqlPragmaForeignKeyOn()
  |         db.execSQL(PRAGMA_FOREIGN_KEY_SCRIPT);
  | 
 | package #{packageName}.database;
