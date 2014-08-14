@@ -16,7 +16,7 @@ mixin constantRelationship(relationship, i)
 
 mixin uriMatcher(model)
  |         URI_MATCHER.addURI(AUTHORITY, #{model.name}Content.CONTENT_PATH, #{upperCase(model.name)}_DIR);
- |         URI_MATCHER.addURI(AUTHORITY, #{model.name}Content.CONTENT_PATH + "/#",    #{upperCase(model.name)}_ID);
+ |         URI_MATCHER.addURI(AUTHORITY, #{model.name}Content.CONTENT_PATH + "/#", #{upperCase(model.name)}_ID);
  | 
 
 mixin uriMatcherRelationship(relationship)
@@ -197,7 +197,7 @@ each model in models
 | 
 each relationship in relationships
  +uriMatcherRelationship(relationship)
-|    }
+|   }
 | 
 each model in models
  +contentColumns(model)

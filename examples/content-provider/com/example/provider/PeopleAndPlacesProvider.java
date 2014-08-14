@@ -48,13 +48,13 @@ public class PeopleAndPlacesProvider extends ContentProvider {
         URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
  
         URI_MATCHER.addURI(AUTHORITY, PersonContent.CONTENT_PATH, PERSON_DIR);
-        URI_MATCHER.addURI(AUTHORITY, PersonContent.CONTENT_PATH + "/#",    PERSON_ID);
+        URI_MATCHER.addURI(AUTHORITY, PersonContent.CONTENT_PATH + "/#", PERSON_ID);
  
         URI_MATCHER.addURI(AUTHORITY, PlaceContent.CONTENT_PATH, PLACE_DIR);
-        URI_MATCHER.addURI(AUTHORITY, PlaceContent.CONTENT_PATH + "/#",    PLACE_ID);
+        URI_MATCHER.addURI(AUTHORITY, PlaceContent.CONTENT_PATH + "/#", PLACE_ID);
   
         URI_MATCHER.addURI(AUTHORITY, PlaceJoinPersonContent.CONTENT_PATH, PLACE_JOIN_PERSON_DIR);
-    }
+   }
  
     private static class PersonContent implements BaseColumns {
         private PersonContent() {}
