@@ -54,7 +54,7 @@ each member, i in members
   +columnType(member)
   if i < members.length - 1
     +comma()
-each relationship, i in relationships
+each relationship in relationships
   if (name == relationship.child)
     +comma() 
     |  FOREIGN KEY(#{relationship.child_column}) REFERENCES #{lowerCase(relationship.parent)}(#{relationship.parent_column}) 
