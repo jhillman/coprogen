@@ -1,6 +1,6 @@
 {
   "name": "codegen",
-  "description": "A powerful, flexible, language-agnostic, boilerplate-vanquishing code generation toolkit forged from pure awesomeness.",
+  "description": "An Android ContentProvider generator",
   "version": "0.0.1",
   "homepage": "https://github.com/jhillman/CodeGenerator",
   "author": {
