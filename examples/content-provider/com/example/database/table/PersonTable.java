@@ -1,25 +1,29 @@
 package com.example.database.table;
  
-public interface PersonTable {
-    String TABLE_NAME = "person";
+public final class PersonTable {
+    private PersonTable() {}
  
-    String _ID = "_id"; 
+    public static final String TABLE_NAME = "person";
  
-    String NAME = "name"; 
+    public static final String _ID = "_id"; 
  
-    String AGE = "age"; 
+    public static final String NAME = "name"; 
  
-    String ALIVE = "alive"; 
+    public static final String AGE = "age"; 
  
-    String BODY_FAT = "body_fat"; 
+    public static final String ALIVE = "alive"; 
+ 
+    public static final String BODY_FAT = "body_fat"; 
+ 
+    public static final String ID_PLACE = "id_place"; 
   
-    String[] ALL_COLUMNS = new String[] { _ID, NAME, AGE, ALIVE, BODY_FAT };
+    public static final String[] ALL_COLUMNS = new String[] { _ID, NAME, AGE, ALIVE, BODY_FAT, ID_PLACE };
  
-    String SQL_CREATE = "CREATE TABLE person ( _id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, age INTEGER, alive INTEGER, body_fat NUMERIC )";
+    public static final String SQL_CREATE = "CREATE TABLE person ( _id INTEGER PRIMARY KEY AUTOINCREMENT , name TEXT, age INTEGER, alive INTEGER, body_fat NUMERIC, id_place TEXT, FOREIGN KEY(id_place) REFERENCES place(_id) ON UPDATE NO ACTION ON DELETE CASCADE  )";
  
-    String SQL_INSERT = "INSERT INTO person ( name, age, alive, body_fat ) VALUES ( ?, ?, ?, ? )";
+    public static final String SQL_INSERT = "INSERT INTO person ( name, age, alive, body_fat, id_place ) VALUES ( ?, ?, ?, ?, ? )";
  
-    String SQL_DROP = "DROP TABLE IF EXISTS person";
+    public static final String SQL_DROP = "DROP TABLE IF EXISTS person";
  
-    String WHERE_ID_EQUALS = _ID + "=?";
+    public static final String WHERE_ID_EQUALS = _ID + "=?";
 }

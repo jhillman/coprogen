@@ -8,6 +8,7 @@ import android.provider.BaseColumns;
 import android.text.TextUtils;
 import android.content.ContentUris;
 import android.database.sqlite.SQLiteQueryBuilder;
+import android.util.Log;
  
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -24,11 +25,14 @@ public class PeopleAndPlacesProvider extends ContentProvider {
     public static final String AUTHORITY = "com.example.provider.people_and_places";
   
     public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
+    public static final String TAG = "PeopleAndPlacesProvider";
  
     public static final Uri PERSON_CONTENT_URI = Uri.withAppendedPath(PeopleAndPlacesProvider.AUTHORITY_URI, PersonContent.CONTENT_PATH);
  
     public static final Uri PLACE_CONTENT_URI = Uri.withAppendedPath(PeopleAndPlacesProvider.AUTHORITY_URI, PlaceContent.CONTENT_PATH);
-   
+  
+    public static final Uri PLACE_JOIN_PERSON_CONTENT_URI = Uri.withAppendedPath(PeopleAndPlacesProvider.AUTHORITY_URI, PlaceJoinPersonContent.CONTENT_PATH);
+  
     private static final UriMatcher URI_MATCHER;
     private PeopleAndPlacesDatabase mDatabase;
  
@@ -37,7 +41,9 @@ public class PeopleAndPlacesProvider extends ContentProvider {
  
     private static final int PLACE_DIR = 2;
     private static final int PLACE_ID = 3;
-   
+  
+    private static final int PLACE_JOIN_PERSON_DIR = 4;
+  
     static {
         URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
  
@@ -46,20 +52,31 @@ public class PeopleAndPlacesProvider extends ContentProvider {
  
         URI_MATCHER.addURI(AUTHORITY, PlaceContent.CONTENT_PATH, PLACE_DIR);
         URI_MATCHER.addURI(AUTHORITY, PlaceContent.CONTENT_PATH + "/#",    PLACE_ID);
-     }
+  
+        URI_MATCHER.addURI(AUTHORITY, PlaceJoinPersonContent.CONTENT_PATH, PLACE_JOIN_PERSON_DIR);
+    }
  
-    public static final class PersonContent implements BaseColumns {
+    private static class PersonContent implements BaseColumns {
+        private PersonContent() {}
+ 
         public static final String CONTENT_PATH = "person";
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.people_and_places.person";
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.people_and_places.person";
     }
  
-    public static final class PlaceContent implements BaseColumns {
+    private static class PlaceContent implements BaseColumns {
+        private PlaceContent() {}
+ 
         public static final String CONTENT_PATH = "place";
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.people_and_places.place";
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.people_and_places.place";
     }
-   
+  
+    public static final class PlaceJoinPersonContent implements BaseColumns {
+        public static final String CONTENT_PATH = "place_join_person";
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.people_and_places.place_join_person";
+    }
+  
     @Override
     public final boolean onCreate() {
         mDatabase = new PeopleAndPlacesDatabase(getContext());
@@ -78,7 +95,10 @@ public class PeopleAndPlacesProvider extends ContentProvider {
                 return PlaceContent.CONTENT_TYPE;
             case PLACE_ID:
                 return PlaceContent.CONTENT_ITEM_TYPE;
-   
+  
+            case PLACE_JOIN_PERSON_DIR:
+                return PlaceJoinPersonContent.CONTENT_TYPE;
+  
             default:
                 throw new IllegalArgumentException("Unsupported URI: " + uri);
         }
@@ -92,16 +112,42 @@ public class PeopleAndPlacesProvider extends ContentProvider {
         switch (URI_MATCHER.match(uri)) {
             case PERSON_ID:
                 queryBuilder.appendWhere(PersonTable._ID + "=" + uri.getLastPathSegment());
+                break;
             case PERSON_DIR:
                 queryBuilder.setTables(PersonTable.TABLE_NAME);
                 break;
  
             case PLACE_ID:
                 queryBuilder.appendWhere(PlaceTable._ID + "=" + uri.getLastPathSegment());
+                break;
             case PLACE_DIR:
                 queryBuilder.setTables(PlaceTable.TABLE_NAME);
                 break;
-   
+  
+            case PLACE_JOIN_PERSON_DIR:
+                queryBuilder.setTables(PlaceTable.TABLE_NAME + " LEFT OUTER JOIN " + PersonTable.TABLE_NAME + " ON (" + PlaceTable.TABLE_NAME + "." + PlaceTable._ID + "=" + PersonTable.TABLE_NAME + "." + PersonTable.ID_PLACE + ")");
+ 
+                projection = new String[] {
+                    PlaceTable.TABLE_NAME + "." + PlaceTable._ID + " || " + PersonTable.TABLE_NAME + "." + PersonTable._ID + " AS " + PlaceTable._ID,
+ 
+                    PersonTable.TABLE_NAME + "._id AS " + PersonTable.TABLE_NAME + "__id",
+ 
+                    PersonTable.TABLE_NAME + "." + PersonTable.NAME + " AS " + PersonTable.TABLE_NAME + "_" + PersonTable.NAME,
+ 
+                    PersonTable.TABLE_NAME + "." + PersonTable.AGE + " AS " + PersonTable.TABLE_NAME + "_" + PersonTable.AGE,
+ 
+                    PersonTable.TABLE_NAME + "." + PersonTable.ALIVE + " AS " + PersonTable.TABLE_NAME + "_" + PersonTable.ALIVE,
+ 
+                    PersonTable.TABLE_NAME + "." + PersonTable.BODY_FAT + " AS " + PersonTable.TABLE_NAME + "_" + PersonTable.BODY_FAT,
+ 
+                    PersonTable.TABLE_NAME + "." + PersonTable.ID_PLACE + " AS " + PersonTable.TABLE_NAME + "_" + PersonTable.ID_PLACE,
+ 
+                    PlaceTable.TABLE_NAME + "._id AS " + PlaceTable.TABLE_NAME + "__id",
+ 
+                    PlaceTable.TABLE_NAME + "." + PlaceTable.ADDRESS + " AS " + PlaceTable.TABLE_NAME + "_" + PlaceTable.ADDRESS,
+                };
+                break;
+  
             default :
                 throw new IllegalArgumentException("Unsupported URI:" + uri);
         }
@@ -125,24 +171,27 @@ public class PeopleAndPlacesProvider extends ContentProvider {
                 case PERSON_ID:
                     final long personId = dbConnection.insertOrThrow(PersonTable.TABLE_NAME, null, values);
                     final Uri newPersonUri = ContentUris.withAppendedId(PERSON_CONTENT_URI, personId);
-                    getContext().getContentResolver().notifyChange(newPersonUri, null); 
-                    dbConnection.setTransactionSuccessful();
+                    getContext().getContentResolver().notifyChange(newPersonUri, null);
+                    getContext().getContentResolver().notifyChange(PLACE_JOIN_PERSON_CONTENT_URI, null);
+  
                     return newPersonUri;
  
                 case PLACE_DIR:
                 case PLACE_ID:
                     final long placeId = dbConnection.insertOrThrow(PlaceTable.TABLE_NAME, null, values);
                     final Uri newPlaceUri = ContentUris.withAppendedId(PLACE_CONTENT_URI, placeId);
-                    getContext().getContentResolver().notifyChange(newPlaceUri, null); 
-                    dbConnection.setTransactionSuccessful();
+                    getContext().getContentResolver().notifyChange(newPlaceUri, null);
+                    getContext().getContentResolver().notifyChange(PLACE_JOIN_PERSON_CONTENT_URI, null);
+  
                     return newPlaceUri;
   
                 default :
                     throw new IllegalArgumentException("Unsupported URI:" + uri);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, e.getMessage(), e);
         } finally {
+            dbConnection.setTransactionSuccessful();
             dbConnection.endTransaction();
         }
  
@@ -161,34 +210,39 @@ public class PeopleAndPlacesProvider extends ContentProvider {
             switch (URI_MATCHER.match(uri)) {
                case PERSON_DIR :
                    updateCount = dbConnection.update(PersonTable.TABLE_NAME, values, selection, selectionArgs);
+ 
+                   joinUris.add(PLACE_JOIN_PERSON_CONTENT_URI);
   
-                   dbConnection.setTransactionSuccessful();
                    break;
                case PERSON_ID :
                    final long personId = ContentUris.parseId(uri);
                    updateCount = dbConnection.update(PersonTable.TABLE_NAME, values, 
                        PersonTable._ID + "=" + personId + (TextUtils.isEmpty(selection) ? "" : " AND (" + selection + ")"), selectionArgs);
+ 
+                   joinUris.add(PLACE_JOIN_PERSON_CONTENT_URI);
   
-                   dbConnection.setTransactionSuccessful();
                    break;
  
                case PLACE_DIR :
                    updateCount = dbConnection.update(PlaceTable.TABLE_NAME, values, selection, selectionArgs);
+ 
+                   joinUris.add(PLACE_JOIN_PERSON_CONTENT_URI);
   
-                   dbConnection.setTransactionSuccessful();
                    break;
                case PLACE_ID :
                    final long placeId = ContentUris.parseId(uri);
                    updateCount = dbConnection.update(PlaceTable.TABLE_NAME, values, 
                        PlaceTable._ID + "=" + placeId + (TextUtils.isEmpty(selection) ? "" : " AND (" + selection + ")"), selectionArgs);
+ 
+                   joinUris.add(PLACE_JOIN_PERSON_CONTENT_URI);
   
-                   dbConnection.setTransactionSuccessful();
                    break;
   
                 default :
                     throw new IllegalArgumentException("Unsupported URI:" + uri);
             }
         } finally {
+            dbConnection.setTransactionSuccessful();
             dbConnection.endTransaction();
         }
  
@@ -216,30 +270,35 @@ public class PeopleAndPlacesProvider extends ContentProvider {
             switch (URI_MATCHER.match(uri)) {
                 case PERSON_DIR :
                     deleteCount = dbConnection.delete(PersonTable.TABLE_NAME, selection, selectionArgs);
+ 
+                    joinUris.add(PLACE_JOIN_PERSON_CONTENT_URI);
   
-                    dbConnection.setTransactionSuccessful();
                     break;
                 case PERSON_ID :
                     deleteCount = dbConnection.delete(PersonTable.TABLE_NAME, PersonTable.WHERE_ID_EQUALS, new String[] { uri.getLastPathSegment() });
+ 
+                    joinUris.add(PLACE_JOIN_PERSON_CONTENT_URI);
   
-                    dbConnection.setTransactionSuccessful();
                     break;
  
                 case PLACE_DIR :
                     deleteCount = dbConnection.delete(PlaceTable.TABLE_NAME, selection, selectionArgs);
+ 
+                    joinUris.add(PLACE_JOIN_PERSON_CONTENT_URI);
   
-                    dbConnection.setTransactionSuccessful();
                     break;
                 case PLACE_ID :
                     deleteCount = dbConnection.delete(PlaceTable.TABLE_NAME, PlaceTable.WHERE_ID_EQUALS, new String[] { uri.getLastPathSegment() });
+ 
+                    joinUris.add(PLACE_JOIN_PERSON_CONTENT_URI);
   
-                    dbConnection.setTransactionSuccessful();
                     break;
   
                 default :
                     throw new IllegalArgumentException("Unsupported URI:" + uri);
             }
         } finally {
+            dbConnection.setTransactionSuccessful();
             dbConnection.endTransaction();
         }
  

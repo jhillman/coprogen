@@ -22,6 +22,10 @@
         {
           "type" : "double",
           "name" : "body_fat"
+        },
+        {
+          "type" : "long",
+          "name" : "id_place"
         }
       ],
       "parcelable": true
@@ -36,5 +40,15 @@
       ],
       "gson": true
     }
-  ]
+  ],
+    "relationships": [
+      {
+        "parent": "Place",
+        "child": "Person",
+        "parent_column": "_id",
+        "child_column": "id_place",
+        "on_delete":"cascade",
+        "on_update":"no action"  
+      }
+    ]
 }
