@@ -5,7 +5,9 @@ mixin sqlCreate(model)
 mixin sqlDrop(model)
  |         db.execSQL(#{model.name}Table.SQL_DROP);
  | 
-
+mixin sqlPragmaForeingKeyOn()
+ |         db.execSQL(PRAGMA_FOREIGN_KEY_SCRIPT);
+ | 
 | package #{packageName}.database;
 | 
 | import #{packageName}.database.table.*;
@@ -19,6 +21,7 @@ mixin sqlDrop(model)
 | public class #{capitalize(camelCase(databaseName))}Database extends SQLiteOpenHelper {
 |     private static final String DATABASE_NAME = "#{databaseName}.db";
 |     private static final int DATABASE_VERSION = #{databaseVersion};
+|     private static final String PRAGMA_FOREIGN_KEY_SCRIPT = "PRAGMA foreign_keys = ON;";
 |     public static final String TAG = "#{capitalize(camelCase(databaseName))}Database";
 | 
 |     public #{capitalize(camelCase(databaseName))}Database(final Context context) {
@@ -35,7 +38,13 @@ each model in models
 |     public final void onUpgrade(final SQLiteDatabase db, final int oldVersion, final int newVersion) {
 |         upgrade(db, oldVersion, newVersion);
 |     }
-|   
+|     @Override
+|     public void onOpen(SQLiteDatabase db) {
+|       super.onOpen(db);
+if relationships.length>0
+  +sqlPragmaForeingKeyOn()
+|     }
+| 
 |     private final void dropTablesAndCreate(final SQLiteDatabase db) {
 each model in models
   +sqlDrop(model)
