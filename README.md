@@ -1,6 +1,6 @@
 # codegen
 
-A powerful, flexible, language-agnostic, boilerplate-vanquishing code generation toolkit forged from pure awesomeness.
+An Android ContentProvider generator.
 
 ## Getting Started
 Install with npm:
