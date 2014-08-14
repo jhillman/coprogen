@@ -6,8 +6,8 @@ import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
    
-import com.example.database.table.PersonTable;
- 
+import com.example.database.table.PersonTable; 
+  
 import java.util.ArrayList;
 import java.util.List;
  
@@ -17,6 +17,7 @@ public class Person implements Parcelable {
     private int mAge; 
     private boolean mAlive; 
     private double mBodyFat; 
+    private long mIdPlace; 
   
     private ContentValues mValues = new ContentValues();
  
@@ -33,6 +34,7 @@ public class Person implements Parcelable {
         setAge(cursor.getInt(cursor.getColumnIndex(prefix + PersonTable.AGE))); 
         setAlive(cursor.isNull(cursor.getColumnIndex(prefix + PersonTable.ALIVE)) ? false : cursor.getInt(cursor.getColumnIndex(prefix + PersonTable.ALIVE)) != 0); 
         setBodyFat(cursor.getDouble(cursor.getColumnIndex(prefix + PersonTable.BODY_FAT))); 
+        setIdPlace(cursor.getLong(cursor.getColumnIndex(prefix + PersonTable.ID_PLACE))); 
     }
  
     public Person(Parcel parcel) {
@@ -42,9 +44,11 @@ public class Person implements Parcelable {
  
         setAge(parcel.readInt()); 
  
-        setAlive(parcel.readInt() == 0); 
+        setAlive(parcel.readInt() == 1); 
  
         setBodyFat(parcel.readDouble()); 
+ 
+        setIdPlace(parcel.readLong()); 
     }
     
     @Override
@@ -63,6 +67,8 @@ public class Person implements Parcelable {
         parcel.writeInt(getAlive() ? 1 : 0); 
  
         parcel.writeDouble(getBodyFat()); 
+ 
+        parcel.writeLong(getIdPlace()); 
     }
  
     public static final Creator<Person> CREATOR = new Creator<Person>() {
@@ -75,29 +81,34 @@ public class Person implements Parcelable {
         }
     };
   
-    public void setRowId(long _id) {
+    public final void setRowId(long _id) {
         mRowId = _id;
         mValues.put(PersonTable._ID, _id);
     }
  
-    public void setName(String name) {
+    public final void setName(String name) {
         mName = name;
         mValues.put(PersonTable.NAME, name);
     }
  
-    public void setAge(int age) {
+    public final void setAge(int age) {
         mAge = age;
         mValues.put(PersonTable.AGE, age);
     }
  
-    public void setAlive(boolean alive) {
+    public final void setAlive(boolean alive) {
         mAlive = alive;
         mValues.put(PersonTable.ALIVE, alive);
     }
  
-    public void setBodyFat(double bodyFat) {
+    public final void setBodyFat(double bodyFat) {
         mBodyFat = bodyFat;
         mValues.put(PersonTable.BODY_FAT, bodyFat);
+    }
+ 
+    public final void setIdPlace(long idPlace) {
+        mIdPlace = idPlace;
+        mValues.put(PersonTable.ID_PLACE, idPlace);
     }
   
     public long getRowId() {
@@ -118,6 +129,10 @@ public class Person implements Parcelable {
  
     public double getBodyFat() {
         return mBodyFat;
+    }
+ 
+    public long getIdPlace() {
+        return mIdPlace;
     }
    
     public ContentValues getContentValues() {

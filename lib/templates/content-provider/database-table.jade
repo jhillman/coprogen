@@ -47,12 +47,21 @@ each member, i in members
     +comma()
 |  };
 | 
-|     public static final String SQL_CREATE = "CREATE TABLE #{lowerCase(name)} ( _id INTEGER PRIMARY KEY AUTOINCREMENT,
+|     public static final String SQL_CREATE = "CREATE TABLE #{lowerCase(name)} ( _id INTEGER PRIMARY KEY AUTOINCREMENT ,
+
 each member, i in members
   +columnNameLower(member)
   +columnType(member)
   if i < members.length - 1
     +comma()
+each relationship in relationships
+  if (name == relationship.child)
+    +comma() 
+    |  FOREIGN KEY(#{relationship.child_column}) REFERENCES #{lowerCase(relationship.parent)}(#{relationship.parent_column}) 
+    if(relationship.on_update)
+      | ON UPDATE #{upperCase(relationship.on_update)} 
+    if(relationship.on_delete)
+      | ON DELETE #{upperCase(relationship.on_delete)} 
 |  )";
 | 
 |     public static final String SQL_INSERT = "INSERT INTO #{lowerCase(name)} (

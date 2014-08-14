@@ -5,8 +5,8 @@ import android.database.Cursor;
   
 import com.google.gson.annotations.SerializedName;
   
-import com.example.database.table.PlaceTable;
- 
+import com.example.database.table.PlaceTable; 
+  
 import java.util.ArrayList;
 import java.util.List;
  
@@ -30,12 +30,12 @@ public class Place {
         setAddress(cursor.getString(cursor.getColumnIndex(prefix + PlaceTable.ADDRESS))); 
     }
   
-    public void setRowId(long _id) {
+    public final void setRowId(long _id) {
         mRowId = _id;
         mValues.put(PlaceTable._ID, _id);
     }
  
-    public void setAddress(String address) {
+    public final void setAddress(String address) {
         mAddress = address;
         mValues.put(PlaceTable.ADDRESS, address);
     }
