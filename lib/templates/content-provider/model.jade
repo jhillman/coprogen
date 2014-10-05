@@ -103,12 +103,12 @@ each enumName in enums
 - else
   | public class #{name} {
   | 
-|    private long mRowId;
+|    private transient long mRowId;
 | 
 each member in members
   +member(member)
 | 
-|     private ContentValues mValues = new ContentValues();
+|     private transient ContentValues mValues = new ContentValues();
 | 
 |     public #{name}() {}
 | 
@@ -171,7 +171,22 @@ each member in members
 | 
 each member in members
   +getter(member)
-|   
+- if (gson)
+  |     public void updateContentValues() {
+  |         mValues = new ContentValues();
+  | 
+  each member in members
+     - if (member.type.match(/(boolean|short|int|long|float|double)/i))
+      |         set#{camelCase(capitalize(member.name))}(m#{camelCase(capitalize(member.name))});
+      | 
+     - else
+      |         if (m#{camelCase(capitalize(member.name))} != null) {
+      |             set#{camelCase(capitalize(member.name))}(m#{camelCase(capitalize(member.name))});
+      |         }
+      | 
+  |    }
+  | 
+| 
 |     public ContentValues getContentValues() {
 |         return mValues;
 |     }
