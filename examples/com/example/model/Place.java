@@ -11,12 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
  
 public class Place {
-    private long mRowId;
+    private transient long mRowId;
  
     @SerializedName("address") 
     private String mAddress; 
   
-    private ContentValues mValues = new ContentValues();
+    private transient ContentValues mValues = new ContentValues();
  
     public Place() {}
  
@@ -47,7 +47,15 @@ public class Place {
     public String getAddress() {
         return mAddress;
     }
-   
+ 
+    public void updateContentValues() {
+        mValues = new ContentValues();
+ 
+        if (mAddress != null) {
+            setAddress(mAddress);
+        }
+    }
+  
     public ContentValues getContentValues() {
         return mValues;
     }

@@ -1,29 +1,26 @@
 {
-  "name": "codegen",
+  "name": "coprogen",
   "description": "An Android ContentProvider generator",
   "version": "0.0.1",
-  "homepage": "https://github.com/jhillman/CodeGenerator",
+  "homepage": "https://github.com/jhillman/coprogen",
   "author": {
     "name": "Jeff Hillman",
     "email": "jeff.hillman@gmail.com"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/jhillman/CodeGenerator.git"
+    "url": "git://github.com/jhillman/coprogen.git"
   },
   "bugs": {
-    "url": "https://github.com/jhillman/CodeGenerator/issues"
+    "url": "https://github.com/jhillman/coprogen/issues"
   },
-  "main": "codegen",
+  "main": "coprogen",
   "preferGlobal": "true",
   "bin": {
-    "codegen" : "codegen.js"
+    "coprogen": "coprogen.js"
   },
   "engines": {
     "node": ">= 0.8.0"
-  },
-  "scripts": {
-    "test": "grunt nodeunit"
   },
   "devDependencies": {
     "grunt-contrib-jshint": "~0.6.4",
@@ -31,10 +28,8 @@
     "grunt-contrib-watch": "~0.5.3",
     "grunt": "~0.4.1",
     "jade": "~0.30.0",
-    "stewardess": "~0.2.2",
-    "waitress": "~0.1.5",
-    "path": "~0.4.9",
-    "optimist": "~0.5.2"
+    "optimist": "~0.5.2",
+    "async": "^0.9.0"
   },
   "keywords": []
 }

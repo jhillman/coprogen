@@ -1,4 +1,4 @@
-# codegen
+# coprogen
 
 An Android ContentProvider generator.
 
@@ -7,13 +7,13 @@ Install with npm:
 ```bash
 $ npm install
 ```
-Link the command line tool (codegen):
+Link the command line tool (coprogen):
 ```bash
 $ npm link
 ```
-Run `codegen` in the directory that contains your code-generator.json file:
+Run `coprogen` in the directory that contains your content-provider.json file:
 ```bash
-$ codegen
+$ coprogen
 ```
 
 ## Contributing
