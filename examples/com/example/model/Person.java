@@ -12,14 +12,14 @@ import java.util.ArrayList;
 import java.util.List;
  
 public class Person implements Parcelable {
-    private long mRowId;
+    private transient long mRowId;
     private String mName; 
     private int mAge; 
     private boolean mAlive; 
     private double mBodyFat; 
     private long mIdPlace; 
   
-    private ContentValues mValues = new ContentValues();
+    private transient ContentValues mValues = new ContentValues();
  
     public Person() {}
  
@@ -134,7 +134,7 @@ public class Person implements Parcelable {
     public long getIdPlace() {
         return mIdPlace;
     }
-   
+  
     public ContentValues getContentValues() {
         return mValues;
     }
