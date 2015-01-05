@@ -13,6 +13,26 @@ mixin columnType(member)
  else
   |  TEXT
 
+mixin columnDefault(member)
+  if (member.hasOwnProperty('default')) 
+    if (member.default == null)
+      |  DEFAULT NULL
+    else if (member.type == 'String')
+      |  DEFAULT '#{member.default}'
+    else if (member.type == 'boolean')
+      if (member.default)
+        |  DEFAULT 1
+      else
+        |  DEFAULT 0
+    else
+      |  DEFAULT #{member.default}
+
+mixin columnConstraints(member)
+  if (member.notNull)
+   |  NOT NULL
+  if (member.unique)
+   |  UNIQUE
+
 mixin columnNameLower(member)
  |  #{lowerCase(member.name)}
 
@@ -47,22 +67,33 @@ each member, i in members
     +comma()
 |  };
 | 
-|     public static final String SQL_CREATE = "CREATE TABLE #{lowerCase(name)} ( _id INTEGER PRIMARY KEY AUTOINCREMENT ,
+|     public static final String SQL_CREATE = "CREATE TABLE #{lowerCase(name)} (_id INTEGER PRIMARY KEY AUTOINCREMENT,
 
 each member, i in members
   +columnNameLower(member)
   +columnType(member)
+  +columnDefault(member)
+  +columnConstraints(member)
   if i < members.length - 1
     +comma()
 each relationship in relationships
   if (name == relationship.child)
     +comma() 
-    |  FOREIGN KEY(#{relationship.child_column}) REFERENCES #{lowerCase(relationship.parent)}(#{relationship.parent_column}) 
+    |  FOREIGN KEY(#{relationship.child_column}) REFERENCES #{lowerCase(relationship.parent)}(#{relationship.parent_column})
     if (relationship.on_update)
-      | ON UPDATE #{upperCase(relationship.on_update)} 
+      |  ON UPDATE #{upperCase(relationship.on_update)}
     if (relationship.on_delete)
-      | ON DELETE #{upperCase(relationship.on_delete)} 
-|  )";
+      |  ON DELETE #{upperCase(relationship.on_delete)}
+each constraint in constraints
+  +comma()
+  if (constraint.type == 'unique')
+    |  UNIQUE(
+    each member, i in constraint.members
+      +columnNameLower({ name: member })
+      if i < constraint.members.length - 1
+        +comma()
+    |  )
+| )";
 | 
 |     public static final String SQL_INSERT = "INSERT INTO #{lowerCase(name)} (
 each member, i in members

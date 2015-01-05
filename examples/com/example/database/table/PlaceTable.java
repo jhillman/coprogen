@@ -11,7 +11,7 @@ public final class PlaceTable {
   
     public static final String[] ALL_COLUMNS = new String[] { _ID, ADDRESS };
  
-    public static final String SQL_CREATE = "CREATE TABLE place ( _id INTEGER PRIMARY KEY AUTOINCREMENT , address TEXT )";
+    public static final String SQL_CREATE = "CREATE TABLE place (_id INTEGER PRIMARY KEY AUTOINCREMENT, address TEXT UNIQUE)";
  
     public static final String SQL_INSERT = "INSERT INTO place ( address ) VALUES ( ? )";
  

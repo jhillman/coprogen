@@ -8,15 +8,18 @@
       "members" : [
         {
           "type" : "String",
-          "name" : "name"
+          "name" : "name",
+          "default": null
         },
         {
           "type" : "int",
-          "name" : "age"
+          "name" : "age",
+          "notNull": true
         },
         {
           "type" : "boolean",
-          "name" : "alive"
+          "name" : "alive",
+          "default": true
         },
         {
           "type" : "double",
@@ -27,27 +30,37 @@
           "name" : "id_place"
         }
       ],
-      "parcelable": true
+      "parcelable": true,
+      "constraints": [
+        {
+          "type": "unique",
+          "members": [
+            "name",
+            "id_place"
+          ]
+        }
+      ]
     },
     {
       "name": "Place",
       "members": [
         {
           "type": "String",
-          "name": "address"
+          "name": "address",
+          "unique": true
         }
       ],
       "gson": true
     }
   ],
-    "relationships": [
-      {
-        "parent": "Place",
-        "child": "Person",
-        "parent_column": "_id",
-        "child_column": "id_place",
-        "on_delete":"cascade",
-        "on_update":"no action"  
-      }
-    ]
+  "relationships": [
+    {
+      "parent": "Place",
+      "child": "Person",
+      "parent_column": "_id",
+      "child_column": "id_place",
+      "on_delete":"cascade",
+      "on_update":"no action"  
+    }
+  ]
 }

@@ -19,7 +19,7 @@ public final class PersonTable {
   
     public static final String[] ALL_COLUMNS = new String[] { _ID, NAME, AGE, ALIVE, BODY_FAT, ID_PLACE };
  
-    public static final String SQL_CREATE = "CREATE TABLE person ( _id INTEGER PRIMARY KEY AUTOINCREMENT , name TEXT, age INTEGER, alive INTEGER, body_fat NUMERIC, id_place TEXT, FOREIGN KEY(id_place) REFERENCES place(_id) ON UPDATE NO ACTION ON DELETE CASCADE  )";
+    public static final String SQL_CREATE = "CREATE TABLE person (_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT DEFAULT NULL, age INTEGER NOT NULL, alive INTEGER DEFAULT 1, body_fat NUMERIC, id_place TEXT, FOREIGN KEY(id_place) REFERENCES place(_id) ON UPDATE NO ACTION ON DELETE CASCADE, UNIQUE( name, id_place ))";
  
     public static final String SQL_INSERT = "INSERT INTO person ( name, age, alive, body_fat, id_place ) VALUES ( ?, ?, ?, ?, ? )";
  
