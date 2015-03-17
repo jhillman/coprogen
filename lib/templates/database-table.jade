@@ -10,6 +10,8 @@ mixin columnType(member)
   |  INTEGER
  else if member.type === 'float' || member.type === 'double'
   |  NUMERIC
+ else if member.type === 'byte[]'
+  |  BLOB
  else
   |  TEXT
 

@@ -142,6 +142,8 @@ public class PeopleAndPlacesProvider extends ContentProvider {
  
                     PersonTable.TABLE_NAME + "." + PersonTable.ID_PLACE + " AS " + PersonTable.TABLE_NAME + "_" + PersonTable.ID_PLACE,
  
+                    PersonTable.TABLE_NAME + "." + PersonTable.DATA + " AS " + PersonTable.TABLE_NAME + "_" + PersonTable.DATA,
+ 
                     PlaceTable.TABLE_NAME + "._id AS " + PlaceTable.TABLE_NAME + "__id",
  
                     PlaceTable.TABLE_NAME + "." + PlaceTable.ADDRESS + " AS " + PlaceTable.TABLE_NAME + "_" + PlaceTable.ADDRESS,
