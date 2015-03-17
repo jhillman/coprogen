@@ -25,7 +25,9 @@ public class PeopleAndPlacesDatabase extends SQLiteOpenHelper {
         db.execSQL(PersonTable.SQL_CREATE);
  
         db.execSQL(PlaceTable.SQL_CREATE);
-    }
+  
+        initialize(db);
+   }
   
     @Override
     public final void onUpgrade(final SQLiteDatabase db, final int oldVersion, final int newVersion) {
@@ -47,9 +49,13 @@ public class PeopleAndPlacesDatabase extends SQLiteOpenHelper {
     }
  
     // BEGIN PERSISTED SECTION - put custom methods here
-    // you may change the contents of this method, but do not rename/remove it
-    private void upgrade(db, final int oldVersion, final int newVersion) {
+    // you may change the contents of these methods, but do not rename/remove them
+    private void upgrade(final SQLiteDatabase db, final int oldVersion, final int newVersion) {
+        Log.e(TAG, "Updating database from version " + oldVersion + " to " + newVersion + ".");
         dropTablesAndCreate(db);
+    }
+ 
+    private void initialize() {
     }
     // END PERSISTED SECTION
 }
