@@ -55,7 +55,7 @@ public class PeopleAndPlacesDatabase extends SQLiteOpenHelper {
         dropTablesAndCreate(db);
     }
  
-    private void initialize() {
+    private void initialize(final SQLiteDatabase db) {
     }
     // END PERSISTED SECTION
 }
