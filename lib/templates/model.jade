@@ -14,7 +14,11 @@ mixin setter(member)
  |         m#{camelCase(capitalize(member.name))} = #{camelCase(member.name)};
  |         mValues.put(
  +getTableValue(member)
- | , #{camelCase(member.name) + (member.class ? '.name()' : '')});
+ - if (member.type == 'Date')
+  | , #{camelCase(member.name)} != null ? #{camelCase(member.name)}.getTime() : null);
+ - else 
+  | , #{camelCase(member.name) + (member.class ? '.name()' : '')});
+ | 
  |     }
  | 
 
@@ -48,6 +52,13 @@ mixin setContentValues(member)
   +getTableValueWithPrefix(member)
   | ))); 
   | 
+ - else if (member.type === 'Date')
+  |        set#{camelCase(capitalize(member.name))}(cursor.isNull(cursor.getColumnIndex(
+  +getTableValueWithPrefix(member)
+  | )) ? null : new Date(cursor.getLong(cursor.getColumnIndex(
+  +getTableValueWithPrefix(member)
+  | )))); 
+  | 
  - else
   |        set#{camelCase(capitalize(member.name))}(cursor.get#{capitalize(member.type)}(cursor.getColumnIndex(
   +getTableValueWithPrefix(member)
@@ -69,6 +80,12 @@ mixin fromParcel(member)
   |             set#{camelCase(capitalize(member.name))}(#{camelCase(member.name)}); 
   |         }
   | 
+ - else if (member.type === 'Date')
+  |         long #{camelCase(member.name)}Time = parcel.readLong();
+  |         if (#{camelCase(member.name)}Time >= 0) {
+  |             set#{camelCase(capitalize(member.name))}(new Date(#{camelCase(member.name)}Time)); 
+  |         }
+  | 
  - else
   |         set#{camelCase(capitalize(member.name))}(parcel.read#{capitalize(member.type)}()); 
   | 
@@ -84,6 +101,13 @@ mixin toParcel(member)
   |         if (get#{camelCase(capitalize(member.name))}() != null) {
   |             parcel.writeInt(get#{camelCase(capitalize(member.name))}().length);
   |             parcel.writeByteArray(get#{camelCase(capitalize(member.name))}()); 
+  |         } else {
+  |             parcel.writeInt(-1);
+  |         }
+  | 
+ - else if (member.type == 'Date')
+  |         if (get#{camelCase(capitalize(member.name))}() != null) {
+  |             parcel.writeLong(get#{camelCase(capitalize(member.name))}().getTime());
   |         } else {
   |             parcel.writeInt(-1);
   |         }
@@ -115,8 +139,15 @@ mixin importEnum(enumName)
 each enumName in enums
   +importEnum(enumName)
 | 
-| import java.util.ArrayList;
-| import java.util.List;
+- if (importDate)
+ | import java.util.ArrayList;
+ | import java.util.Date;
+ | import java.util.List;
+ | 
+- else
+ | import java.util.ArrayList;
+ | import java.util.List;
+ | 
 | 
 - if (parcelable)
   | public class #{name} implements Parcelable {

@@ -18,8 +18,9 @@ mixin sqlDrop(model)
 | public class #{capitalize(camelCase(databaseName))}Database extends SQLiteOpenHelper {
 |     private static final String DATABASE_NAME = "#{databaseName}.db";
 |     private static final int DATABASE_VERSION = #{databaseVersion};
+| 
 if relationships.length > 0
- |     private static final String PRAGMA_FOREIGN_KEY_SCRIPT = "PRAGMA foreign_keys = ON;";
+ |    private static final String PRAGMA_FOREIGN_KEY_SCRIPT = "PRAGMA foreign_keys = ON;";
 | 
 |     public static final String TAG = "#{capitalize(camelCase(databaseName))}Database";
 | 

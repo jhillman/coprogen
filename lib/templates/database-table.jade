@@ -12,6 +12,8 @@ mixin columnType(member)
   |  NUMERIC
  else if member.type === 'byte[]'
   |  BLOB
+ else if member.type === 'Date'
+  |  LONG
  else
   |  TEXT
 
