@@ -7,11 +7,12 @@ var fs                       = require('fs'),
     argv                     = require('optimist').argv,
     destinationPath          = process.cwd(),
     contentProviderConfig    = process.cwd() + '/content-provider.json',
+    modelsConfig             = process.cwd() + '/models.json',
     coprogen                 = new ContentProviderGenerator(),
-    contentProviderData,
+    data,
     usage;
 
-function processData(destination, contentProviderData) {
+function processData(destination, data) {
   var dataJson;
 
   if (argv.data) {
@@ -22,15 +23,15 @@ function processData(destination, contentProviderData) {
     }
 
     for (var key in dataJson) {
-      contentProviderData[key] = dataJson[key];
+      data[key] = dataJson[key];
     }
   }
 
-  if (!contentProviderData.relationships) {
-    contentProviderData.relationships = [];
+  if (!data.relationships) {
+    data.relationships = [];
   }
 
-  coprogen.generate(destination, contentProviderData, function(err) {
+  coprogen.generate(destination, data, function(err) {
     if (err) console.log('coprogen error: ' + err);
 
     console.log('coprogen has completed successfully!');
@@ -61,10 +62,18 @@ if (argv.dest) {
 
 fs.exists(contentProviderConfig, function(exists) {
   if (exists) {
-    contentProviderData = require(contentProviderConfig);
+    data = require(contentProviderConfig);
 
-    processData(destinationPath, contentProviderData);
+    processData(destinationPath, data);
   } else {
-    usage();
+    fs.exists(modelsConfig, function(exists) {
+      if (exists) {
+        data = require(modelsConfig);
+
+        processData(destinationPath, data);
+      } else {
+        usage();
+      }
+    });
   }
 });

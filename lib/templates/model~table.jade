@@ -1,0 +1,147 @@
+include ../templates/model~mixins.jade
+
+| package #{packageName}.model;
+| 
+| import android.content.ContentValues;
+| import android.database.Cursor;
+| 
+- if (parcelable)
+  | import android.os.Parcel;
+  | import android.os.Parcelable;
+  | 
+| 
+- if (gson)
+  | import com.google.gson.annotations.SerializedName;
+  | 
+| 
+| import #{packageName}.database.table.#{name}Table; 
+| 
+each enumName in enums
+  +importEnum(enumName)
+| 
+each modelName in models
+  +importModel(modelName)
+| 
+- if (importDate && importLists)
+ | import java.util.ArrayList;
+ | import java.util.Date;
+ | import java.util.List;
+ | 
+- else if (importLists)
+ | import java.util.ArrayList;
+ | import java.util.List;
+ | 
+- else if (importDate)
+ | import java.util.Date;
+ | 
+| 
+- if (parcelable)
+  | public class #{name} implements Parcelable {
+  | 
+- else
+  | public class #{name} {
+  | 
+|    private transient long mRowId;
+| 
+each member in members
+  +member(member)
+| 
+|     private transient ContentValues mValues = new ContentValues();
+| 
+|     public #{name}() {}
+| 
+|     public #{name}(final Cursor cursor) {
+|         this(cursor, false);
+|     }
+| 
+|     public #{name}(final Cursor cursor, boolean prependTableName) {
+|         String prefix = prependTableName ? #{name}Table.TABLE_NAME + "_" : "";
+
+|         setRowId(cursor.getLong(cursor.getColumnIndex(prefix + #{name}Table._ID)));
+| 
+each member in members
+  +setContentValues(member)
+|    }
+| 
+- if (parcelable)
+  |     public #{name}(Parcel parcel) {
+  |         mRowId = parcel.readLong();
+  | 
+  each member in members
+    +fromParcel(member)
+  |    }
+  |     
+  |     @Override
+  |     public int describeContents() {
+  |         return 0;
+  |     }
+  | 
+  |     @Override
+  |     public void writeToParcel(Parcel parcel, int flags) {
+  |         parcel.writeLong(mRowId);
+  | 
+  each member in members
+    +toParcel(member)
+  |    }
+  | 
+  |     public static final Creator<#{name}> CREATOR = new Creator<#{name}>() {
+  |         public #{name} createFromParcel(Parcel in) {
+  |             return new #{name}(in);
+  |         }
+  | 
+  |         public #{name}[] newArray(int size) {
+  |             return new #{name}[size];
+  |         }
+  |     };
+  | 
+| 
+|     public final void setRowId(long _id) {
+|         mRowId = _id;
+|         mValues.put(#{name}Table._ID, _id);
+|     }
+| 
+each member in members
+  +setter(member)
+|  
+|     public long getRowId() {
+|         return mRowId;
+|     }
+| 
+each member in members
+  +getter(member)
+- if (gson)
+  |     public void updateContentValues() {
+  |         mValues = new ContentValues();
+  | 
+  each member in members
+     - if (member.type.match(/(boolean|short|int|long|float|double)/i))
+      |         set#{camelCase(capitalize(member.name))}(m#{camelCase(capitalize(member.name))});
+      | 
+     - else
+      |         if (m#{camelCase(capitalize(member.name))} != null) {
+      |             set#{camelCase(capitalize(member.name))}(m#{camelCase(capitalize(member.name))});
+      |         }
+      | 
+  |    }
+  | 
+| 
+|     public ContentValues getContentValues() {
+|         return mValues;
+|     }
+|   
+|     public static List<#{name}> listFromCursor(Cursor cursor) {
+|         List<#{name}> list = new ArrayList<#{name}>();
+| 
+|         if (cursor != null && cursor.moveToFirst()) {
+|             do {
+|                 list.add(new #{name}(cursor));
+|             } while (cursor.moveToNext());
+|         }
+| 
+|         return list;
+|     }
+| 
+|     // BEGIN PERSISTED SECTION - put custom methods here
+| !{persistedSection}
+|     // END PERSISTED SECTION
+|}
