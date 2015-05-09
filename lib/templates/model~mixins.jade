@@ -6,17 +6,17 @@ mixin member(member)
    - else
      |     @SerializedName("#{member.name}") 
      | 
- |    private !{modelMap[member.class] || enumMap[member.class] || member.type} m#{camelCase(capitalize(member.name))}; 
+ |    private !{modelMap[member.name + member.class] || enumMap[member.class] || member.type} m#{camelCase(capitalize(member.name))}; 
  | 
 
 mixin pojoSetter(member)
- |     public final void set#{camelCase(capitalize(member.name))}(!{modelMap[member.class] || enumMap[member.class] || member.type} #{camelCase(member.name)}) {
+ |     public final void set#{camelCase(capitalize(member.name))}(!{modelMap[member.name + member.class] || enumMap[member.class] || member.type} #{camelCase(member.name)}) {
  |         m#{camelCase(capitalize(member.name))} = #{camelCase(member.name)};
  |     }
  | 
 
 mixin setter(member)
- |     public final void set#{camelCase(capitalize(member.name))}(#{modelMap[member.class] || enumMap[member.class] || member.type} #{camelCase(member.name)}) {
+ |     public final void set#{camelCase(capitalize(member.name))}(#{modelMap[member.name + member.class] || enumMap[member.class] || member.type} #{camelCase(member.name)}) {
  |         m#{camelCase(capitalize(member.name))} = #{camelCase(member.name)};
  |         mValues.put(
  +getTableValue(member)
@@ -29,9 +29,35 @@ mixin setter(member)
  | 
 
 mixin getter(member)
- |     public !{modelMap[member.class] || enumMap[member.class] || member.type} get#{camelCase(capitalize(member.name))}() {
+ |     public !{modelMap[member.name + member.class] || enumMap[member.class] || member.type} get#{camelCase(capitalize(member.name))}() {
  |         return m#{camelCase(capitalize(member.name))};
  |     }
+ | 
+
+mixin constructorParameter(member)
+ | !{modelMap[member.name + member.class] || enumMap[member.class] || member.type} #{camelCase(member.name)}
+
+mixin constructorAssignment(member)
+ |         set#{camelCase(capitalize(member.name))}(#{camelCase(member.name)});
+ | 
+
+mixin comma(member)
+ | , 
+
+mixin constructors()
+ | 
+ each constructor in constructors
+   | 
+   |     public #{name}(
+   each member, i in constructor.members
+     +constructorParameter(member)
+     if i < constructor.members.length - 1
+       +comma()
+   | ) {
+   each member, i in constructor.members
+     +constructorAssignment(member)
+   |    } 
+ | 
  | 
 
 mixin getTableValue(member)
@@ -94,22 +120,22 @@ mixin fromParcel(member)
   | 
  - else if (member.type === 'class')
   - if (member.parcelable)
-    |         #{modelMap[member.class]} #{camelCase(member.name)} = parcel.readParcelable(#{modelMap[member.class]}.class.getClassLoader());
+    |         #{modelMap[member.name + member.class]} #{camelCase(member.name)} = parcel.readParcelable(#{modelMap[member.name + member.class]}.class.getClassLoader());
     |         set#{camelCase(capitalize(member.name))}(#{camelCase(member.name)}); 
     | 
   - else if (member.serializable)
-    |         #{modelMap[member.class]} #{camelCase(member.name)} = (#{modelMap[member.class]})parcel.readSerializable();
+    |         #{modelMap[member.name + member.class]} #{camelCase(member.name)} = (#{modelMap[member.name + member.class]})parcel.readSerializable();
     |         set#{camelCase(capitalize(member.name))}(#{camelCase(member.name)}); 
     | 
  - else if (member.type === 'class[]')
   - if (member.parcelable)
-    |         Array!{modelMap[member.class]} #{camelCase(member.name)} = parcel.createTypedArrayList(#{modelNameMap[member.class]}.CREATOR);
+    |         Array!{modelMap[member.name + member.class]} #{camelCase(member.name)} = parcel.createTypedArrayList(#{modelNameMap[member.class]}.CREATOR);
     |         set#{camelCase(capitalize(member.name))}(#{camelCase(member.name)}); 
     | 
   - else if (member.serializable)
     |         int #{camelCase(member.name)}Count = parcel.readInt();
     |         if (#{camelCase(member.name)}Count >= 0) {
-    |             !{modelMap[member.class]} #{camelCase(member.name)} = new Array!{modelMap[member.class]}();
+    |             !{modelMap[member.name + member.class]} #{camelCase(member.name)} = new Array!{modelMap[member.name + member.class]}();
     |             
     |             for (int i = 0; i < #{camelCase(member.name)}Count; i++) {
     |                 #{camelCase(member.name)}.add((#{modelNameMap[member.class]})parcel.readSerializable());
