@@ -1,6 +1,10 @@
 include ../templates/model~mixins.jade
 
-| package #{packageName}.model;
+-if (package)
+  | package #{packageName}.model.#{package};
+-else
+  | package #{packageName}.model;  
+| 
 | 
 | import android.content.ContentValues;
 | import android.database.Cursor;
@@ -10,7 +14,16 @@ include ../templates/model~mixins.jade
   | import android.os.Parcelable;
   | 
 | 
-- if (gson)
+- if (gson && classes && classLists)
+  | import com.google.gson.Gson;
+  | import com.google.gson.annotations.SerializedName;
+  | import com.google.gson.reflect.TypeToken;
+  | 
+- else if (gson && classes)
+  | import com.google.gson.Gson;
+  | import com.google.gson.annotations.SerializedName;
+  | 
+- else if (gson) 
   | import com.google.gson.annotations.SerializedName;
   | 
 | 
@@ -47,6 +60,9 @@ each member in members
   +member(member)
 | 
 |     private transient ContentValues mValues = new ContentValues();
+- if (classes || classLists)
+  |     private transient Gson mGson = getGson();
+  | 
 | 
 |     public #{name}() {}
 +constructors
@@ -56,8 +72,8 @@ each member in members
 |     }
 | 
 |     public #{name}(final Cursor cursor, boolean prependTableName) {
-|         String prefix = prependTableName ? #{name}Table.TABLE_NAME + "_" : "";
-
+|         String prefix = prependTableName ? #{name}Table.TABLE_NAME.replace("`", "") + "_" : "";
+| 
 |         setRowId(cursor.getLong(cursor.getColumnIndex(prefix + #{name}Table._ID)));
 | 
 each member in members

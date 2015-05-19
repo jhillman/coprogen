@@ -1,7 +1,7 @@
 mixin member(member)
  - if (gson)
-   - if (typeof(member.serialized_name) !== 'undefined')
-     |     @SerializedName("#{member.serialized_name}") 
+   - if (typeof(member.serializedName) !== 'undefined')
+     |     @SerializedName("#{member.serializedName}") 
      | 
    - else
      |     @SerializedName("#{member.name}") 
@@ -16,14 +16,18 @@ mixin pojoSetter(member)
  | 
 
 mixin setter(member)
- |     public final void set#{camelCase(capitalize(member.name))}(#{modelMap[member.name + member.class] || enumMap[member.class] || member.type} #{camelCase(member.name)}) {
+ |     public final void set#{camelCase(capitalize(member.name))}(!{modelMap[member.name + member.class] || enumMap[member.class] || member.type} #{camelCase(member.name)}) {
  |         m#{camelCase(capitalize(member.name))} = #{camelCase(member.name)};
  |         mValues.put(
  +getTableValue(member)
  - if (member.type == 'Date')
   | , #{camelCase(member.name)} != null ? #{camelCase(member.name)}.getTime() : null);
- - else 
-  | , #{camelCase(member.name) + (member.class ? '.name()' : '')});
+ - else if (member.type == 'enum')
+  | , #{camelCase(member.name)} != null ? #{camelCase(member.name)}.name() : null);
+ - else if (member.type == 'class' || member.type == 'class[]')
+  | , mGson.toJson(#{camelCase(member.name)}));
+ - else
+  | , #{camelCase(member.name)});
  | 
  |     }
  | 
@@ -90,6 +94,16 @@ mixin setContentValues(member)
   | )) ? null : new Date(cursor.getLong(cursor.getColumnIndex(
   +getTableValueWithPrefix(member)
   | )))); 
+  | 
+ - else if (member.type === 'class')
+  |        set#{camelCase(capitalize(member.name))}(mGson.fromJson(cursor.getString(cursor.getColumnIndex(
+  +getTableValueWithPrefix(member)
+  | )), !{modelMap[member.name + member.class]}.class)); 
+  | 
+ - else if (member.type === 'class[]')
+  |        set#{camelCase(capitalize(member.name))}(mGson.fromJson(cursor.getString(cursor.getColumnIndex(
+  +getTableValueWithPrefix(member)
+  | )), new TypeToken<!{modelMap[member.name + member.class]}>(){}.getType())); 
   | 
  - else
   |        set#{camelCase(capitalize(member.name))}(cursor.get#{capitalize(member.type)}(cursor.getColumnIndex(

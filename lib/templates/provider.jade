@@ -85,15 +85,15 @@ mixin queryCaseRelationship(relationship)
 mixin insertCase(model)
  |                 case #{upperCase(model.name)}_DIR:
  |                 case #{upperCase(model.name)}_ID:
- |                     final long #{lowerCase(model.name)}Id = dbConnection.insertOrThrow(#{model.name}Table.TABLE_NAME, null, values);
- |                     final Uri new#{model.name}Uri = ContentUris.withAppendedId(#{upperCase(model.name)}_CONTENT_URI, #{lowerCase(model.name)}Id);
- |                     getContext().getContentResolver().notifyChange(new#{model.name}Uri, null);
+ |                     final long #{lowerCase(model.name)}Id = replace ? dbConnection.replaceOrThrow(#{model.name}Table.TABLE_NAME, null, values) : dbConnection.insertOrThrow(#{model.name}Table.TABLE_NAME, null, values);
+ |                     final Uri #{lowerCase(model.name)}Uri = ContentUris.withAppendedId(#{upperCase(model.name)}_CONTENT_URI, #{lowerCase(model.name)}Id);
+ |                     getContext().getContentResolver().notifyChange(#{lowerCase(model.name)}Uri, null);
  - each relationship in relationships
    - if (model.name == relationship.parent || model.name == relationship.child)
      |                     getContext().getContentResolver().notifyChange(#{upperCase(relationship.parent)}_JOIN_#{upperCase(relationship.child)}_CONTENT_URI, null);
      | 
  | 
- |                     return new#{model.name}Uri;
+ |                     return #{lowerCase(model.name)}Uri;
  | 
 
 mixin updateCase(model)
@@ -173,9 +173,11 @@ mixin deleteCase(model)
 | 
 |     public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
 |     public static final String TAG = "#{capitalize(camelCase(databaseName))}Provider";
+|     public static final String SQL_INSERT_OR_REPLACE = "__sql_insert_or_replace__";
 | 
 each model in models
- +contentUri(model)
+  - if (!model.noTable)
+    +contentUri(model)
 | 
 each relationship in relationships
  +contentUriRelationship(relationship)
@@ -184,7 +186,8 @@ each relationship in relationships
 |     private #{capitalize(camelCase(databaseName))}Database mDatabase;
 | 
 each model, i in models
- +constant(model, i)
+  - if (!model.noTable)
+    +constant(model, i)
 | 
 each relationship, i in relationships
  +constantRelationship(relationship, i + models.length)
@@ -193,14 +196,16 @@ each relationship, i in relationships
 |         URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
 | 
 each model in models
- +uriMatcher(model)
+  - if (!model.noTable)
+    +uriMatcher(model)
 | 
 each relationship in relationships
  +uriMatcherRelationship(relationship)
 |   }
 | 
 each model in models
- +contentColumns(model)
+  - if (!model.noTable)
+    +contentColumns(model)
 | 
 each relationship in relationships
  +contentColumnsRelationship(relationship)
@@ -215,7 +220,8 @@ each relationship in relationships
 |     public final String getType(final Uri uri) {
 |         switch (URI_MATCHER.match(uri)) {
 each model in models
- +typeCase(model)
+  - if (!model.noTable)
+    +typeCase(model)
 | 
 each relationship in relationships
  +typeCaseRelationship(relationship)
@@ -232,7 +238,8 @@ each relationship in relationships
 | 
 |         switch (URI_MATCHER.match(uri)) {
 each model in models
- +queryCase(model)
+  - if (!model.noTable)
+    +queryCase(model)
 | 
 each relationship in relationships
  +queryCaseRelationship(relationship)
@@ -251,13 +258,20 @@ each relationship in relationships
 |     @Override
 |     public final Uri insert(final Uri uri, final ContentValues values) {
 |         final SQLiteDatabase dbConnection = mDatabase.getWritableDatabase();
+|         boolean replace = false;
+| 
+|         if (values.containsKey(SQL_INSERT_OR_REPLACE)) {
+|             replace = values.getAsBoolean(SQL_INSERT_OR_REPLACE);
+|             values.remove(SQL_INSERT_OR_REPLACE);
+|         }
 | 
 |         try {
 |             dbConnection.beginTransaction();
 | 
 |             switch (URI_MATCHER.match(uri)) {
 each model in models
- +insertCase(model)
+  - if (!model.noTable)
+    +insertCase(model)
 | 
 |                 default :
 |                     throw new IllegalArgumentException("Unsupported URI:" + uri);
@@ -283,7 +297,8 @@ each model in models
 | 
 |             switch (URI_MATCHER.match(uri)) {
 each model in models
- +updateCase(model)
+  - if (!model.noTable)
+    +updateCase(model)
 | 
 |                 default :
 |                     throw new IllegalArgumentException("Unsupported URI:" + uri);
@@ -316,7 +331,8 @@ each model in models
 | 
 |             switch (URI_MATCHER.match(uri)) {
 each model in models
- +deleteCase(model)
+  - if (!model.noTable)
+    +deleteCase(model)
 | 
 |                 default :
 |                     throw new IllegalArgumentException("Unsupported URI:" + uri);
