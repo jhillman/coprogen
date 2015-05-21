@@ -71,45 +71,51 @@ mixin getTableValueWithPrefix(member)
  | prefix + #{capitalize(name)}Table.#{upperCase(member.name)}
 
 mixin setContentValues(member)
+ |        if (fields == null || fields.contains(
+ +getTableValueWithPrefix(member)
+ |)) {
+ | 
  - if (member.type === 'boolean')
-  |        set#{camelCase(capitalize(member.name))}(!cursor.isNull(cursor.getColumnIndex(
+  |            set#{camelCase(capitalize(member.name))}(!cursor.isNull(cursor.getColumnIndex(
   +getTableValueWithPrefix(member)
   | )) && cursor.getInt(cursor.getColumnIndex(
   +getTableValueWithPrefix(member)
   | )) != 0); 
   | 
  - else if (member.type === 'enum')
-  |        set#{camelCase(capitalize(member.name))}(#{enumMap[member.class]}.valueOf(cursor.getString(cursor.getColumnIndex(
+  |            set#{camelCase(capitalize(member.name))}(#{enumMap[member.class]}.valueOf(cursor.getString(cursor.getColumnIndex(
   +getTableValueWithPrefix(member)
   | )))); 
   | 
  - else if (member.type === 'byte[]')
-  |        set#{camelCase(capitalize(member.name))}(cursor.getBlob(cursor.getColumnIndex(
+  |            set#{camelCase(capitalize(member.name))}(cursor.getBlob(cursor.getColumnIndex(
   +getTableValueWithPrefix(member)
   | ))); 
   | 
  - else if (member.type === 'Date')
-  |        set#{camelCase(capitalize(member.name))}(cursor.isNull(cursor.getColumnIndex(
+  |            set#{camelCase(capitalize(member.name))}(cursor.isNull(cursor.getColumnIndex(
   +getTableValueWithPrefix(member)
   | )) ? null : new Date(cursor.getLong(cursor.getColumnIndex(
   +getTableValueWithPrefix(member)
   | )))); 
   | 
  - else if (member.type === 'class')
-  |        set#{camelCase(capitalize(member.name))}(mGson.fromJson(cursor.getString(cursor.getColumnIndex(
+  |            set#{camelCase(capitalize(member.name))}(mGson.fromJson(cursor.getString(cursor.getColumnIndex(
   +getTableValueWithPrefix(member)
   | )), !{modelMap[member.name + member.class]}.class)); 
   | 
  - else if (member.type === 'class[]')
-  |        set#{camelCase(capitalize(member.name))}(mGson.fromJson(cursor.getString(cursor.getColumnIndex(
+  |            set#{camelCase(capitalize(member.name))}(mGson.fromJson(cursor.getString(cursor.getColumnIndex(
   +getTableValueWithPrefix(member)
   | )), new TypeToken<!{modelMap[member.name + member.class]}>(){}.getType())); 
   | 
  - else
-  |        set#{camelCase(capitalize(member.name))}(cursor.get#{capitalize(member.type)}(cursor.getColumnIndex(
+  |            set#{camelCase(capitalize(member.name))}(cursor.get#{capitalize(member.type)}(cursor.getColumnIndex(
   +getTableValueWithPrefix(member)
   | ))); 
   | 
+ |        } 
+ | 
 
 mixin fromParcel(member)
  - if (member.type === 'boolean')

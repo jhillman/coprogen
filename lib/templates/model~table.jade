@@ -48,6 +48,8 @@ each modelName in models
  | import java.util.Date;
  | 
 | 
+| import java.util.Set;
+| 
 - if (parcelable)
   | public class #{name} implements Parcelable {
   | 
@@ -68,10 +70,14 @@ each member in members
 +constructors
 |  
 |     public #{name}(final Cursor cursor) {
-|         this(cursor, false);
+|         this(cursor, false, null);
+|     }
+|  
+|     public #{name}(final Cursor cursor, Set<String> fields) {
+|         this(cursor, false, fields);
 |     }
 | 
-|     public #{name}(final Cursor cursor, boolean prependTableName) {
+|     public #{name}(final Cursor cursor, boolean prependTableName, Set<String> fields) {
 |         String prefix = prependTableName ? #{name}Table.TABLE_NAME.replace("`", "") + "_" : "";
 | 
 |         setRowId(cursor.getLong(cursor.getColumnIndex(prefix + #{name}Table._ID)));
