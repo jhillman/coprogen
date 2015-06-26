@@ -1,12 +1,38 @@
 mixin member(member)
- - if (gson)
-   - if (typeof(member.serializedName) !== 'undefined')
-     |     @SerializedName("#{member.serializedName}") 
+ - if (gson && !member.noGson)
+   |     @SerializedName("#{typeof(member.serializedName) !== 'undefined' ? member.serializedName : member.name}") 
+   | 
+ - if (simpleXml)
+   - if (member.type == 'class[]')
+     |     @SerializedName("#{typeof(member.serializedName) !== 'undefined' ? member.serializedName : member.name}") 
+     |     @ElementList(entry = "#{member.serializedName || member.name}", inline=#{member.inline ? true : false}) 
      | 
    - else
-     |     @SerializedName("#{member.name}") 
-     | 
- |    private !{modelMap[member.name + member.class] || enumMap[member.class] || member.type} m#{camelCase(capitalize(member.name))}; 
+     - if (member.prefix && member.path)
+       |     @SerializedName("#{typeof(member.serializedName) !== 'undefined' ? member.serializedName : member.name}") 
+       |     @Namespace(prefix="#{member.prefix}") 
+       |     @Path("#{member.path}")
+       |     @#{member.attribute ? 'Attribute' : 'Element'}#{member.type == 'class[]' ? 'List' : ''}(name = "#{member.serializedName || member.name}", required = #{member.hasOwnProperty('required') ? member.required : true}) 
+       | 
+     - else if (member.prefix)
+       |     @SerializedName("#{typeof(member.serializedName) !== 'undefined' ? member.serializedName : member.name}") 
+       |     @Namespace(prefix="#{member.prefix}") 
+       |     @#{member.attribute ? 'Attribute' : 'Element'}#{member.type == 'class[]' ? 'List' : ''}(name = "#{member.serializedName || member.name}", required = #{member.hasOwnProperty('required') ? member.required : true}) 
+       | 
+     - else if (member.path)
+       |     @SerializedName("#{typeof(member.serializedName) !== 'undefined' ? member.serializedName : member.name}") 
+       |     @Path("#{member.path}")
+       |     @#{member.attribute ? 'Attribute' : 'Element'}#{member.type == 'class[]' ? 'List' : ''}(name = "#{member.serializedName || member.name}", required = #{member.hasOwnProperty('required') ? member.required : true}) 
+       | 
+     - else 
+       |     @SerializedName("#{typeof(member.serializedName) !== 'undefined' ? member.serializedName : member.name}") 
+       |     @#{member.attribute ? 'Attribute' : 'Element'}#{member.type == 'class[]' ? 'List' : ''}(name = "#{member.serializedName || member.name}", required = #{member.hasOwnProperty('required') ? member.required : true}) 
+       | 
+ - if (member.noGson)
+   |    private transient !{modelMap[member.name + member.class] || enumMap[member.class] || member.type} m#{camelCase(capitalize(member.name))}; 
+ - else
+   |    private !{modelMap[member.name + member.class] || enumMap[member.class] || member.type} m#{camelCase(capitalize(member.name))}; 
+ | 
  | 
 
 mixin pojoSetter(member)
@@ -71,7 +97,7 @@ mixin getTableValueWithPrefix(member)
  | prefix + #{capitalize(name)}Table.#{upperCase(member.name)}
 
 mixin setContentValues(member)
- |        if (fields == null || fields.contains(
+ |        if (shouldSet(cursor, fields, 
  +getTableValueWithPrefix(member)
  |)) {
  | 
@@ -105,7 +131,7 @@ mixin setContentValues(member)
   | )), !{modelMap[member.name + member.class]}.class)); 
   | 
  - else if (member.type === 'class[]')
-  |            set#{camelCase(capitalize(member.name))}(mGson.fromJson(cursor.getString(cursor.getColumnIndex(
+  |            set#{camelCase(capitalize(member.name))}((!{modelMap[member.name + member.class]}) mGson.fromJson(cursor.getString(cursor.getColumnIndex(
   +getTableValueWithPrefix(member)
   | )), new TypeToken<!{modelMap[member.name + member.class]}>(){}.getType())); 
   | 
@@ -122,7 +148,10 @@ mixin fromParcel(member)
   |         set#{camelCase(capitalize(member.name))}(parcel.readInt() == 1); 
   | 
  - else if (member.type === 'enum')
-  |         set#{camelCase(capitalize(member.name))}(#{enumMap[member.class]}.valueOf(parcel.readString())); 
+  |         String #{camelCase(member.name)}String = parcel.readString();
+  |         if (#{camelCase(member.name)}String != null) {
+  |             set#{camelCase(capitalize(member.name))}(#{enumMap[member.class]}.valueOf(#{camelCase(member.name)}String)); 
+  |         }
   | 
  - else if (member.type === 'byte[]')
   |         int #{camelCase(member.name)}Length = parcel.readInt();
@@ -173,7 +202,7 @@ mixin toParcel(member)
   |         parcel.writeInt(get#{camelCase(capitalize(member.name))}() ? 1 : 0); 
   | 
  - else if (member.type == 'enum')
-  |         parcel.writeString(get#{camelCase(capitalize(member.name))}().name()); 
+  |         parcel.writeString(get#{camelCase(capitalize(member.name))}() != null ? get#{camelCase(capitalize(member.name))}().name() : null); 
   | 
  - else if (member.type == 'byte[]')
   |         if (get#{camelCase(capitalize(member.name))}() != null) {
@@ -222,5 +251,75 @@ mixin importEnum(enumName)
  | 
 
 mixin importModel(modelName)
- | import #{modelName};
+ | import !{modelName};
  | 
+
+mixin namespace(namespace)
+ | @Namespace(prefix="#{namespace.prefix}", reference="#{namespace.reference}")
+
+mixin imports(table)
+ - if (parcelable)
+   | import android.os.Parcel;
+   | import android.os.Parcelable;
+   | 
+ - if (importSerializable)
+   | import java.io.Serializable;
+   | 
+ | 
+ - if (gson)
+   - if (classLists)
+     | import com.google.gson.Gson;
+     | import com.google.gson.annotations.SerializedName;
+     | import com.google.gson.reflect.TypeToken;
+     | 
+   - else if (classes)
+     | import com.google.gson.Gson;
+     | import com.google.gson.annotations.SerializedName;
+     | 
+   - else 
+     | import com.google.gson.annotations.SerializedName;
+     | 
+  - if (simpleXml) 
+    | import org.simpleframework.xml.*;
+    | import com.google.gson.annotations.SerializedName;
+    | 
+    - if (table && (classes || classLists))
+      | import com.google.gson.Gson;
+      | 
+ each enumName in enums
+   +importEnum(enumName)
+ | 
+ each modelName in models
+   +importModel(modelName)
+ | 
+ - if (importDate && importLists)
+  | import java.util.ArrayList;
+  | import java.util.Date;
+  | import java.util.List;
+  | 
+ - else if (importLists)
+  | import java.util.ArrayList;
+  | import java.util.List;
+  | 
+ - else if (importDate)
+  | import java.util.Date;
+  | 
+
+mixin classDeclaration
+ - if (simpleXml)
+   | 
+   | @Root(strict=false) 
+   | @NamespaceList({ 
+   each namespace, i in simpleXmlNamespaces
+     +namespace(namespace)
+     if i < simpleXmlNamespaces.length - 1
+       +comma()
+   | })
+ - else 
+   | 
+ - if (parcelable)
+   | public class #{name} implements Parcelable {
+   | 
+ - else
+   | public class #{name} {
+   | 

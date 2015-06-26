@@ -6,48 +6,9 @@ include ../templates/model~mixins.jade
   | package #{packageName}.model;  
 | 
 | 
-- if (parcelable)
-  | import android.os.Parcel;
-  | import android.os.Parcelable;
-  | 
-- if (importSerializable)
-  | import java.io.Serializable;
-  | 
++imports(false)
 | 
-- if (gson)
-  | import com.google.gson.annotations.SerializedName;
-  | 
-| 
-each enumName in enums
-  +importEnum(enumName)
-| 
-each modelName in models
-  +importModel(modelName)
-| 
-- if (importDate && importLists)
- | import java.util.ArrayList;
- | import java.util.Date;
- | import java.util.List;
- | 
-- else if (importLists)
-  - if (parcelable)
-   | import java.util.ArrayList;
-   | import java.util.List;
-   | 
-  - else 
-   | import java.util.List;
-   | 
-- else if (importDate)
- | import java.util.Date;
- | 
-| 
-- if (parcelable)
-  | public class #{name} implements Parcelable {
-  | 
-- else
-  | public class #{name} {
-  | 
-| 
++classDeclaration 
 each member in members
   +member(member)
 | 

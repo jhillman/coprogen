@@ -27,7 +27,7 @@ mixin contentColumns(model)
  |     private static class #{model.name}Content implements BaseColumns {
  |         private #{model.name}Content() {}
  | 
- |         public static final String CONTENT_PATH = "#{lowerCase(model.name)}";
+ |         public static final String CONTENT_PATH = "`#{lowerCase(model.name)}`";
  |         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.#{databaseName}.#{lowerCase(model.name)}";
  |         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.#{databaseName}.#{lowerCase(model.name)}";
  |     }
@@ -62,7 +62,7 @@ mixin queryCase(model)
  | 
 
 mixin projectionMap(model, member)
- |                     #{model.name}Table.TABLE_NAME + "." + #{model.name}Table.#{upperCase(member.name)} + " AS " + #{model.name}Table.TABLE_NAME + "_" + #{model.name}Table.#{upperCase(member.name)},
+ |                     #{model.name}Table.TABLE_NAME.replace("`", "") + "." + #{model.name}Table.#{upperCase(member.name)} + " AS " + #{model.name}Table.TABLE_NAME.replace("`", "") + "_" + #{model.name}Table.#{upperCase(member.name)},
  | 
 
 mixin queryCaseRelationship(relationship)
@@ -74,7 +74,7 @@ mixin queryCaseRelationship(relationship)
  | 
  - each model in models
    - if (model.name == relationship.parent || model.name == relationship.child)
-     |                     #{model.name}Table.TABLE_NAME + "._id AS " + #{model.name}Table.TABLE_NAME + "__id",
+     |                     #{model.name}Table.TABLE_NAME + "._id AS " + #{model.name}Table.TABLE_NAME.replace("`", "") + "__id",
      | 
      - each member in model.members
        +projectionMap(model, member)

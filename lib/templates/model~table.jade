@@ -9,53 +9,12 @@ include ../templates/model~mixins.jade
 | import android.content.ContentValues;
 | import android.database.Cursor;
 | 
-- if (parcelable)
-  | import android.os.Parcel;
-  | import android.os.Parcelable;
-  | 
-| 
-- if (gson && classes && classLists)
-  | import com.google.gson.Gson;
-  | import com.google.gson.annotations.SerializedName;
-  | import com.google.gson.reflect.TypeToken;
-  | 
-- else if (gson && classes)
-  | import com.google.gson.Gson;
-  | import com.google.gson.annotations.SerializedName;
-  | 
-- else if (gson) 
-  | import com.google.gson.annotations.SerializedName;
-  | 
++imports(true)
 | 
 | import #{packageName}.database.table.#{name}Table; 
 | 
-each enumName in enums
-  +importEnum(enumName)
-| 
-each modelName in models
-  +importModel(modelName)
-| 
-- if (importDate && importLists)
- | import java.util.ArrayList;
- | import java.util.Date;
- | import java.util.List;
- | 
-- else if (importLists)
- | import java.util.ArrayList;
- | import java.util.List;
- | 
-- else if (importDate)
- | import java.util.Date;
- | 
-| 
 | import java.util.Set;
-| 
-- if (parcelable)
-  | public class #{name} implements Parcelable {
-  | 
-- else
-  | public class #{name} {
-  | 
++classDeclaration
 |    private transient long mRowId;
 | 
 each member in members
@@ -80,11 +39,17 @@ each member in members
 |     public #{name}(final Cursor cursor, boolean prependTableName, Set<String> fields) {
 |         String prefix = prependTableName ? #{name}Table.TABLE_NAME.replace("`", "") + "_" : "";
 | 
-|         setRowId(cursor.getLong(cursor.getColumnIndex(prefix + #{name}Table._ID)));
+|         if (shouldSet(cursor, fields, prefix + #{name}Table._ID)) { 
+|             setRowId(cursor.getLong(cursor.getColumnIndex(prefix + #{name}Table._ID)));
+|         } 
 | 
 each member in members
   +setContentValues(member)
 |    }
+|     
+|     private boolean shouldSet(Cursor cursor, Set<String> fields, String field) {
+|         return fields == null || fields.contains(field) && cursor.getColumnIndex(field) != -1;
+|     }
 | 
 - if (parcelable)
   |     public #{name}(Parcel parcel) {
@@ -93,7 +58,7 @@ each member in members
   each member in members
     +fromParcel(member)
   |    }
-  |     
+  | 
   |     @Override
   |     public int describeContents() {
   |         return 0;
@@ -132,7 +97,7 @@ each member in members
 | 
 each member in members
   +getter(member)
-- if (gson)
+- if (gson || simpleXml)
   |     public void updateContentValues() {
   |         mValues = new ContentValues();
   | 
@@ -152,16 +117,20 @@ each member in members
 |         return mValues;
 |     }
 |   
-|     public static List<#{name}> listFromCursor(Cursor cursor) {
+|     public static List<#{name}> listFromCursor(Cursor cursor, Set<String> fields) {
 |         List<#{name}> list = new ArrayList<#{name}>();
 | 
 |         if (cursor != null && cursor.moveToFirst()) {
 |             do {
-|                 list.add(new #{name}(cursor));
+|                 list.add(new #{name}(cursor, fields));
 |             } while (cursor.moveToNext());
 |         }
 | 
 |         return list;
+|     }
+|   
+|     public static List<#{name}> listFromCursor(Cursor cursor) {
+|         return listFromCursor(cursor, null);
 |     }
 | 
 |     // BEGIN PERSISTED SECTION - put custom methods here

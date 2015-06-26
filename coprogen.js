@@ -40,8 +40,8 @@ function processData(destination, data) {
 
 usage = function() {
   console.log('\ncoprogen usage:\n\n' + 
-              'Run from a directory that contains a content-provider.json \n' +
-              'config file, or provide the path as an argument:\n' +
+              'Run from a directory that contains a content-provider.json or\n' +
+              'models.json config file, or provide the path as an argument:\n' +
               '  coprogen --path <relative path to content provider config file>\n\n' +
               'You may also provide the destination directory as an argument:\n' +
               '  coprogen --dest <relative path to the destination directory>\n\n' +
