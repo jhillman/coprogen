@@ -8,15 +8,15 @@ mixin member(member)
      |     @ElementList(entry = "#{member.serializedName || member.name}", inline=#{member.inline ? true : false}) 
      | 
    - else
-     - if (member.prefix && member.path)
+     - if ((member.prefix || member.reference) && member.path)
        |     @SerializedName("#{typeof(member.serializedName) !== 'undefined' ? member.serializedName : member.name}") 
-       |     @Namespace(prefix="#{member.prefix}") 
+       |     @Namespace(#{(member.prefix ? 'prefix' : 'reference')}="#{member.prefix || member.reference}") 
        |     @Path("#{member.path}")
        |     @#{member.attribute ? 'Attribute' : 'Element'}#{member.type == 'class[]' ? 'List' : ''}(name = "#{member.serializedName || member.name}", required = #{member.hasOwnProperty('required') ? member.required : true}) 
        | 
-     - else if (member.prefix)
+     - else if (member.prefix || member.reference)
        |     @SerializedName("#{typeof(member.serializedName) !== 'undefined' ? member.serializedName : member.name}") 
-       |     @Namespace(prefix="#{member.prefix}") 
+       |     @Namespace(#{(member.prefix ? 'prefix' : 'reference')}="#{member.prefix || member.reference}") 
        |     @#{member.attribute ? 'Attribute' : 'Element'}#{member.type == 'class[]' ? 'List' : ''}(name = "#{member.serializedName || member.name}", required = #{member.hasOwnProperty('required') ? member.required : true}) 
        | 
      - else if (member.path)
@@ -285,6 +285,7 @@ mixin imports(table)
     | 
     - if (table && (classes || classLists))
       | import com.google.gson.Gson;
+      | import com.google.gson.reflect.TypeToken;
       | 
  each enumName in enums
    +importEnum(enumName)

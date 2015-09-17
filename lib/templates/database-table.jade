@@ -21,7 +21,7 @@ mixin columnDefault(member)
   if (member.hasOwnProperty('default')) 
     if (member.default == null)
       |  DEFAULT NULL
-    else if (member.type == 'String')
+    else if (member.type == 'String' || member.type == 'enum')
       |  DEFAULT '#{member.default}'
     else if (member.type == 'boolean')
       if (member.default)
