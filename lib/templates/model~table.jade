@@ -49,7 +49,7 @@ each member in members
 |    }
 |     
 |     private boolean shouldSet(Cursor cursor, Set<String> fields, String field) {
-|         return fields == null || fields.contains(field) && cursor.getColumnIndex(field) != -1;
+|         return cursor.getColumnIndex(field) != -1 && (fields == null || fields.contains(field));
 |     }
 | 
 - if (parcelable)
@@ -100,16 +100,29 @@ each member in members
   +getter(member)
 - if (gson || simpleXml)
   |     public void updateContentValues() {
+  |         updateContentValues(null);
+  |     }
+  | 
+  |     public void updateContentValues(Set<String> fields) {
   |         mValues = new ContentValues();
+  | 
   | 
   each member in members
      - if (member.type.match(/(boolean|short|int|long|float|double)/i))
-      |         set#{camelCase(capitalize(member.name))}(m#{camelCase(capitalize(member.name))});
-      | 
-     - else
-      |         if (m#{camelCase(capitalize(member.name))} != null) {
+      |        if (fields == null || fields.contains(
+      +getTableValue(member)
+      |)) {
       |             set#{camelCase(capitalize(member.name))}(m#{camelCase(capitalize(member.name))});
       |         }
+      | 
+      | 
+     - else
+      |        if ((fields == null || fields.contains(
+      +getTableValue(member)
+      |)) && m#{camelCase(capitalize(member.name))} != null) {
+      |             set#{camelCase(capitalize(member.name))}(m#{camelCase(capitalize(member.name))});
+      |         }
+      | 
       | 
   |    }
   | 

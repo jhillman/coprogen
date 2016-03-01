@@ -16,8 +16,8 @@ mixin sqlDrop(model)
 | import android.util.Log;
 |  
 | public class #{capitalize(camelCase(databaseName))}Database extends SQLiteOpenHelper {
-|     private static final String DATABASE_NAME = "#{databaseName}.db";
-|     private static final int DATABASE_VERSION = #{databaseVersion};
+|     public static final String DATABASE_NAME = "#{databaseName}.db";
+|     public static final int DATABASE_VERSION = #{databaseVersion};
 | 
 if relationships.length > 0
  |    private static final String PRAGMA_FOREIGN_KEY_SCRIPT = "PRAGMA foreign_keys = ON;";
@@ -28,7 +28,7 @@ if relationships.length > 0
 | 
 |     public #{capitalize(camelCase(databaseName))}Database(final Context context) {
 - if (externalDatabaseWithDebug)
-  |         super(context, (#{packageName}.BuildConfig.DEBUG ? (android.os.Environment.getExternalStorageDirectory() + java.io.File.separator + "#{databaseName}" + java.io.File.separator) : "") + DATABASE_NAME, null, DATABASE_VERSION);
+  |         super(context, (#{packageName}.BuildConfig.DEBUG ? (context.getExternalFilesDir(null) + java.io.File.separator + "Database" + java.io.File.separator) : "") + DATABASE_NAME, null, DATABASE_VERSION);
   | 
 - else
   |         super(context, DATABASE_NAME, null, DATABASE_VERSION);
