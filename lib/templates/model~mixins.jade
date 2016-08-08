@@ -102,16 +102,20 @@ mixin setContentValues(member)
  |)) {
  | 
  - if (member.type === 'boolean')
-  |            set#{camelCase(capitalize(member.name))}(!cursor.isNull(cursor.getColumnIndex(
-  +getTableValueWithPrefix(member)
-  | )) && cursor.getInt(cursor.getColumnIndex(
+  |            set#{camelCase(capitalize(member.name))}(cursor.getInt(cursor.getColumnIndex(
   +getTableValueWithPrefix(member)
   | )) != 0); 
   | 
  - else if (member.type === 'enum')
-  |            set#{camelCase(capitalize(member.name))}(#{enumMap[member.class]}.valueOf(cursor.getString(cursor.getColumnIndex(
+  |            String value = cursor.getString(cursor.getColumnIndex(
   +getTableValueWithPrefix(member)
-  | )))); 
+  | )); 
+  |             for (#{enumMap[member.class]} enumValue : #{enumMap[member.class]}.values()) {
+  |                 if (enumValue.toString().equals(value)) { 
+  |                     set#{camelCase(capitalize(member.name))}(#{enumMap[member.class]}.valueOf(value)); 
+  |                     break;
+  |                 }
+  |             }
   | 
  - else if (member.type === 'byte[]')
   |            set#{camelCase(capitalize(member.name))}(cursor.getBlob(cursor.getColumnIndex(
@@ -119,9 +123,7 @@ mixin setContentValues(member)
   | ))); 
   | 
  - else if (member.type === 'Date')
-  |            set#{camelCase(capitalize(member.name))}(cursor.isNull(cursor.getColumnIndex(
-  +getTableValueWithPrefix(member)
-  | )) ? null : new Date(cursor.getLong(cursor.getColumnIndex(
+  |            set#{camelCase(capitalize(member.name))}(new Date(cursor.getLong(cursor.getColumnIndex(
   +getTableValueWithPrefix(member)
   | )))); 
   | 

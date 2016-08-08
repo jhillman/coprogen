@@ -49,7 +49,7 @@ each member in members
 |    }
 |     
 |     private boolean shouldSet(Cursor cursor, Set<String> fields, String field) {
-|         return cursor.getColumnIndex(field) != -1 && (fields == null || fields.contains(field));
+|         return cursor.getColumnIndex(field) != -1 && !cursor.isNull(cursor.getColumnIndex(field)) && (fields == null || fields.contains(field));
 |     }
 | 
 - if (parcelable)
