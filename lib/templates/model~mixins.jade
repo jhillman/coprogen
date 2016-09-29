@@ -273,13 +273,38 @@ mixin imports(table)
      | import com.google.gson.Gson;
      | import com.google.gson.annotations.SerializedName;
      | import com.google.gson.reflect.TypeToken;
+     | import com.google.gson.TypeAdapter;
+     | import com.google.gson.reflect.TypeToken;
+     | import com.google.gson.stream.JsonReader;
+     | import com.google.gson.stream.JsonToken;
+     | import com.google.gson.stream.JsonWriter;
+     | import java.io.IOException;
+     | import com.google.gson.GsonBuilder;
+     | import com.chatbooks.model.ModelAdapterFactory;
      | 
    - else if (classes)
      | import com.google.gson.Gson;
      | import com.google.gson.annotations.SerializedName;
+     | import com.google.gson.TypeAdapter;
+     | import com.google.gson.reflect.TypeToken;
+     | import com.google.gson.stream.JsonReader;
+     | import com.google.gson.stream.JsonToken;
+     | import com.google.gson.stream.JsonWriter;
+     | import java.io.IOException;
+     | import com.google.gson.GsonBuilder;
+     | import com.chatbooks.model.ModelAdapterFactory;
      | 
    - else 
+     | import com.google.gson.Gson;
      | import com.google.gson.annotations.SerializedName;
+     | import com.google.gson.TypeAdapter;
+     | import com.google.gson.reflect.TypeToken;
+     | import com.google.gson.stream.JsonReader;
+     | import com.google.gson.stream.JsonToken;
+     | import com.google.gson.stream.JsonWriter;
+     | import java.io.IOException;
+     | import com.google.gson.GsonBuilder;
+     | import com.chatbooks.model.ModelAdapterFactory;
      | 
   - if (simpleXml) 
     | import org.simpleframework.xml.*;
@@ -306,6 +331,72 @@ mixin imports(table)
   | 
  - else if (importDate)
   | import java.util.Date;
+  | 
+
+mixin typeAdapter(name, types, members)
+  | 
+  |     public static final class GsonTypeAdapter extends TypeAdapter<#{name}> {
+  each type in types
+    |         private final TypeAdapter<!{type.type}> m#{type.name}Adapter; 
+    | 
+  | 
+  |         public GsonTypeAdapter(Gson gson) {
+  each type in types
+    |             m#{type.name}Adapter = gson.getAdapter(!{type.isList ? 'new TypeToken<' + type.type + '>(){}' : type.name + '.class'});
+    | 
+  |        }
+  | 
+  |         @Override
+  |         public #{name} read(JsonReader jsonReader) throws IOException {
+  |             #{name} json#{name} = new #{name}();
+  |             jsonReader.beginObject();
+  | 
+  |             while (jsonReader.hasNext()) {
+  |                 String name = jsonReader.nextName();
+  | 
+  |                 if (jsonReader.peek() == JsonToken.NULL) {
+  |                     jsonReader.skipValue();
+  |                     continue;
+  |                 }
+  |                 
+  |                 switch (name) {
+  each member in members
+    if (!member.noGson)
+      |                     case "#{member.serializedName || member.name}":
+      |                         json#{name}.set#{camelCase(capitalize(member.name))}(m#{member.adapterType}Adapter.read(jsonReader));
+      |                         break;
+      | 
+  |                     default: {
+  |                         jsonReader.skipValue();
+  |                     }
+  |                 }
+  |             }
+  | 
+  |             jsonReader.endObject();
+  | 
+  |             return json#{name};
+  |         }
+  | 
+  |         @Override
+  |         public void write(JsonWriter jsonWriter, #{name} object) throws IOException {
+  |             jsonWriter.beginObject();
+  | 
+  each member in members
+    if (!member.noGson)
+      - if (member.type.match(/(boolean|short|int|long|float|double)/i))
+       |             jsonWriter.name("#{member.serializedName || member.name}");
+       |             m#{member.adapterType}Adapter.write(jsonWriter, object.get#{camelCase(capitalize(member.name))}());
+       | 
+      - else
+       |             if (object.get#{camelCase(capitalize(member.name))}() != null) {
+       |                 jsonWriter.name("#{member.serializedName || member.name}");
+       |                 m#{member.adapterType}Adapter.write(jsonWriter, object.get#{camelCase(capitalize(member.name))}());
+       |             }
+       | 
+  | 
+  |             jsonWriter.endObject();
+  |         }
+  |     }
   | 
 
 mixin classDeclaration
