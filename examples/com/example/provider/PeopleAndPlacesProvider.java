@@ -26,6 +26,7 @@ public class PeopleAndPlacesProvider extends ContentProvider {
   
     public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
     public static final String TAG = "PeopleAndPlacesProvider";
+    public static final String SQL_INSERT_OR_REPLACE = "__sql_insert_or_replace__";
  
     public static final Uri PERSON_CONTENT_URI = Uri.withAppendedPath(PeopleAndPlacesProvider.AUTHORITY_URI, PersonContent.CONTENT_PATH);
  
@@ -59,7 +60,7 @@ public class PeopleAndPlacesProvider extends ContentProvider {
     private static class PersonContent implements BaseColumns {
         private PersonContent() {}
  
-        public static final String CONTENT_PATH = "person";
+        public static final String CONTENT_PATH = "`person`";
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.people_and_places.person";
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.people_and_places.person";
     }
@@ -67,7 +68,7 @@ public class PeopleAndPlacesProvider extends ContentProvider {
     private static class PlaceContent implements BaseColumns {
         private PlaceContent() {}
  
-        public static final String CONTENT_PATH = "place";
+        public static final String CONTENT_PATH = "`place`";
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.people_and_places.place";
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.people_and_places.place";
     }
@@ -130,23 +131,21 @@ public class PeopleAndPlacesProvider extends ContentProvider {
                 projection = new String[] {
                     PlaceTable.TABLE_NAME + "." + PlaceTable._ID + " || " + PersonTable.TABLE_NAME + "." + PersonTable._ID + " AS " + PlaceTable._ID,
  
-                    PersonTable.TABLE_NAME + "._id AS " + PersonTable.TABLE_NAME + "__id",
+                    PersonTable.TABLE_NAME + "._id AS " + PersonTable.TABLE_NAME.replace("`", "") + "__id",
  
-                    PersonTable.TABLE_NAME + "." + PersonTable.NAME + " AS " + PersonTable.TABLE_NAME + "_" + PersonTable.NAME,
+                    PersonTable.TABLE_NAME.replace("`", "") + "." + PersonTable.NAME + " AS " + PersonTable.TABLE_NAME.replace("`", "") + "_" + PersonTable.NAME,
  
-                    PersonTable.TABLE_NAME + "." + PersonTable.AGE + " AS " + PersonTable.TABLE_NAME + "_" + PersonTable.AGE,
+                    PersonTable.TABLE_NAME.replace("`", "") + "." + PersonTable.AGE + " AS " + PersonTable.TABLE_NAME.replace("`", "") + "_" + PersonTable.AGE,
  
-                    PersonTable.TABLE_NAME + "." + PersonTable.ALIVE + " AS " + PersonTable.TABLE_NAME + "_" + PersonTable.ALIVE,
+                    PersonTable.TABLE_NAME.replace("`", "") + "." + PersonTable.ALIVE + " AS " + PersonTable.TABLE_NAME.replace("`", "") + "_" + PersonTable.ALIVE,
  
-                    PersonTable.TABLE_NAME + "." + PersonTable.BODY_FAT + " AS " + PersonTable.TABLE_NAME + "_" + PersonTable.BODY_FAT,
+                    PersonTable.TABLE_NAME.replace("`", "") + "." + PersonTable.BODY_FAT + " AS " + PersonTable.TABLE_NAME.replace("`", "") + "_" + PersonTable.BODY_FAT,
  
-                    PersonTable.TABLE_NAME + "." + PersonTable.ID_PLACE + " AS " + PersonTable.TABLE_NAME + "_" + PersonTable.ID_PLACE,
+                    PersonTable.TABLE_NAME.replace("`", "") + "." + PersonTable.ID_PLACE + " AS " + PersonTable.TABLE_NAME.replace("`", "") + "_" + PersonTable.ID_PLACE,
  
-                    PersonTable.TABLE_NAME + "." + PersonTable.DATA + " AS " + PersonTable.TABLE_NAME + "_" + PersonTable.DATA,
+                    PlaceTable.TABLE_NAME + "._id AS " + PlaceTable.TABLE_NAME.replace("`", "") + "__id",
  
-                    PlaceTable.TABLE_NAME + "._id AS " + PlaceTable.TABLE_NAME + "__id",
- 
-                    PlaceTable.TABLE_NAME + "." + PlaceTable.ADDRESS + " AS " + PlaceTable.TABLE_NAME + "_" + PlaceTable.ADDRESS,
+                    PlaceTable.TABLE_NAME.replace("`", "") + "." + PlaceTable.ADDRESS + " AS " + PlaceTable.TABLE_NAME.replace("`", "") + "_" + PlaceTable.ADDRESS,
                 };
                 break;
   
@@ -164,6 +163,12 @@ public class PeopleAndPlacesProvider extends ContentProvider {
     @Override
     public final Uri insert(final Uri uri, final ContentValues values) {
         final SQLiteDatabase dbConnection = mDatabase.getWritableDatabase();
+        boolean replace = false;
+ 
+        if (values.containsKey(SQL_INSERT_OR_REPLACE)) {
+            replace = values.getAsBoolean(SQL_INSERT_OR_REPLACE);
+            values.remove(SQL_INSERT_OR_REPLACE);
+        }
  
         try {
             dbConnection.beginTransaction();
@@ -171,21 +176,21 @@ public class PeopleAndPlacesProvider extends ContentProvider {
             switch (URI_MATCHER.match(uri)) {
                 case PERSON_DIR:
                 case PERSON_ID:
-                    final long personId = dbConnection.insertOrThrow(PersonTable.TABLE_NAME, null, values);
-                    final Uri newPersonUri = ContentUris.withAppendedId(PERSON_CONTENT_URI, personId);
-                    getContext().getContentResolver().notifyChange(newPersonUri, null);
+                    final long personId = replace ? dbConnection.replaceOrThrow(PersonTable.TABLE_NAME, null, values) : dbConnection.insertOrThrow(PersonTable.TABLE_NAME, null, values);
+                    final Uri personUri = ContentUris.withAppendedId(PERSON_CONTENT_URI, personId);
+                    getContext().getContentResolver().notifyChange(personUri, null);
                     getContext().getContentResolver().notifyChange(PLACE_JOIN_PERSON_CONTENT_URI, null);
   
-                    return newPersonUri;
+                    return personUri;
  
                 case PLACE_DIR:
                 case PLACE_ID:
-                    final long placeId = dbConnection.insertOrThrow(PlaceTable.TABLE_NAME, null, values);
-                    final Uri newPlaceUri = ContentUris.withAppendedId(PLACE_CONTENT_URI, placeId);
-                    getContext().getContentResolver().notifyChange(newPlaceUri, null);
+                    final long placeId = replace ? dbConnection.replaceOrThrow(PlaceTable.TABLE_NAME, null, values) : dbConnection.insertOrThrow(PlaceTable.TABLE_NAME, null, values);
+                    final Uri placeUri = ContentUris.withAppendedId(PLACE_CONTENT_URI, placeId);
+                    getContext().getContentResolver().notifyChange(placeUri, null);
                     getContext().getContentResolver().notifyChange(PLACE_JOIN_PERSON_CONTENT_URI, null);
   
-                    return newPlaceUri;
+                    return placeUri;
   
                 default :
                     throw new IllegalArgumentException("Unsupported URI:" + uri);

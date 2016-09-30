@@ -98,34 +98,6 @@ each member in members
 | 
 each member in members
   +getter(member)
-- if (gson || simpleXml)
-  |     public void updateContentValues() {
-  |         updateContentValues(null);
-  |     }
-  | 
-  |     public void updateContentValues(Set<String> fields) {
-  |         mValues = new ContentValues();
-  | 
-  | 
-  each member in members
-     - if (member.type.match(/(boolean|short|int|long|float|double)/i))
-      |        if (fields == null || fields.contains(
-      +getTableValue(member)
-      |)) {
-      |             set#{camelCase(capitalize(member.name))}(m#{camelCase(capitalize(member.name))});
-      |         }
-      | 
-      | 
-     - else
-      |        if ((fields == null || fields.contains(
-      +getTableValue(member)
-      |)) && m#{camelCase(capitalize(member.name))} != null) {
-      |             set#{camelCase(capitalize(member.name))}(m#{camelCase(capitalize(member.name))});
-      |         }
-      | 
-      | 
-  |    }
-  | 
 | 
 |     public ContentValues getContentValues() {
 |         return mValues;

@@ -28,12 +28,9 @@
         {
           "type" : "long",
           "name" : "id_place"
-        },
-        {
-          "type" : "byte[]",
-          "name" : "data"
         }
       ],
+      "gson": false,
       "parcelable": true,
       "constraints": [
         {

@@ -9,14 +9,16 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
  
 public class PeopleAndPlacesDatabase extends SQLiteOpenHelper {
-    private static final String DATABASE_NAME = "people_and_places.db";
-    private static final int DATABASE_VERSION = 1;    private static final String PRAGMA_FOREIGN_KEY_SCRIPT = "PRAGMA foreign_keys = ON;"; 
+    public static final String DATABASE_NAME = "people_and_places.db";
+    public static final int DATABASE_VERSION = 1;
+    private static final String PRAGMA_FOREIGN_KEY_SCRIPT = "PRAGMA foreign_keys = ON;"; 
     public static final String TAG = "PeopleAndPlacesDatabase";
  
     private final Context mContext;
  
     public PeopleAndPlacesDatabase(final Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+  
         mContext = context;
     }
  
