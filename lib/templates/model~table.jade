@@ -122,7 +122,7 @@ each member in members
 |     // BEGIN PERSISTED SECTION - put custom methods here
 | !{persistedSection}
 |     // END PERSISTED SECTION
-- if (gson)
+- if (gson && !noTypeAdapter)
   +typeAdapter(name, types, members)
 | 
 |}
