@@ -16,6 +16,9 @@ each member in members
 +constructors 
 - if (parcelable)
   |    public #{name}(Parcel parcel) { 
+  - if (baseClass)
+    |         super(parcel);
+    | 
   each member in members
     +fromParcel(member)
   |    }
@@ -27,6 +30,9 @@ each member in members
   | 
   |     @Override
   |     public void writeToParcel(Parcel parcel, int flags) { 
+  - if (baseClass)
+    |         super.writeToParcel(parcel, flags);
+    | 
   each member in members
     +toParcel(member)
   |    }

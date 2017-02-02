@@ -17,8 +17,8 @@ mixin nothing()
 |                 Class<T> rawType = (Class<T>) type.getRawType();
 | 
 each model, i in gsonModels
-  |                 !{i == 0 ? 'if' : '} else if'} (#{packageName}.model.#{model.package}.#{model.name}.class.isAssignableFrom(rawType)) {
-  |                     return (TypeAdapter<T>) new #{packageName}.model.#{model.package}.#{model.name}.GsonTypeAdapter(gson);
+  |                 !{i == 0 ? 'if' : '} else if'} (#{packageName}.model#{model.package ? '.' + model.package : ''}.#{model.name}.class.isAssignableFrom(rawType)) {
+  |                     return (TypeAdapter<T>) new #{packageName}.model#{model.package ? '.' + model.package : ''}.#{model.name}.GsonTypeAdapter(gson);
 | 
 |                 } else {
 |                     return null;

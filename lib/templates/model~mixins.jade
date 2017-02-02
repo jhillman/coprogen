@@ -280,7 +280,7 @@ mixin imports(table)
      | import com.google.gson.stream.JsonWriter;
      | import java.io.IOException;
      | import com.google.gson.GsonBuilder;
-     | import com.chatbooks.model.ModelAdapterFactory;
+     | import #{packageName}.model.ModelAdapterFactory;
      | 
    - else if (classes)
      | import com.google.gson.Gson;
@@ -292,7 +292,7 @@ mixin imports(table)
      | import com.google.gson.stream.JsonWriter;
      | import java.io.IOException;
      | import com.google.gson.GsonBuilder;
-     | import com.chatbooks.model.ModelAdapterFactory;
+     | import #{packageName}.model.ModelAdapterFactory;
      | 
    - else 
      | import com.google.gson.Gson;
@@ -304,7 +304,7 @@ mixin imports(table)
      | import com.google.gson.stream.JsonWriter;
      | import java.io.IOException;
      | import com.google.gson.GsonBuilder;
-     | import com.chatbooks.model.ModelAdapterFactory;
+     | import #{packageName}.model.ModelAdapterFactory;
      | 
   - if (simpleXml) 
     | import org.simpleframework.xml.*;
@@ -320,6 +320,9 @@ mixin imports(table)
  each modelName in models
    +importModel(modelName)
  | 
+ - if (baseClass)
+  | import #{baseClass};
+  | 
  - if (importDate && importLists)
   | import java.util.ArrayList;
   | import java.util.Date;
@@ -348,31 +351,42 @@ mixin typeAdapter(name, types, members)
   | 
   |         @Override
   |         public #{name} read(JsonReader jsonReader) throws IOException {
-  |             #{name} json#{name} = new #{name}();
-  |             jsonReader.beginObject();
+  |             #{name} json#{name} = null;
   | 
-  |             while (jsonReader.hasNext()) {
-  |                 String name = jsonReader.nextName();
+  |             if (jsonReader.peek() != JsonToken.NULL && jsonReader.peek() == JsonToken.BEGIN_OBJECT) {
+  |                 json#{name} = new #{name}();
   | 
-  |                 if (jsonReader.peek() == JsonToken.NULL) {
-  |                     jsonReader.skipValue();
-  |                     continue;
-  |                 }
+  |                 jsonReader.beginObject();
+  | 
+  |                 while (jsonReader.hasNext()) {
+  |                     String name = jsonReader.nextName();
+  | 
+  |                     if (jsonReader.peek() == JsonToken.NULL) {
+  |                         jsonReader.skipValue();
+  |                         continue;
+  |                     }
   |                 
-  |                 switch (name) {
+  |                     switch (name) {
+  each member in baseMembers
+    if (!member.noGson)
+      |                         case "#{member.serializedName || member.name}":
+      |                             json#{name}.set#{camelCase(capitalize(member.name))}(m#{member.adapterType}Adapter.read(jsonReader));
+      |                             break;
+      | 
   each member in members
     if (!member.noGson)
-      |                     case "#{member.serializedName || member.name}":
-      |                         json#{name}.set#{camelCase(capitalize(member.name))}(m#{member.adapterType}Adapter.read(jsonReader));
-      |                         break;
+      |                         case "#{member.serializedName || member.name}":
+      |                             json#{name}.set#{camelCase(capitalize(member.name))}(m#{member.adapterType}Adapter.read(jsonReader));
+      |                             break;
       | 
-  |                     default: {
-  |                         jsonReader.skipValue();
+  |                         default: {
+  |                             jsonReader.skipValue();
+  |                         }
   |                     }
   |                 }
-  |             }
   | 
-  |             jsonReader.endObject();
+  |                 jsonReader.endObject();
+  |             }
   | 
   |             return json#{name};
   |         }
@@ -381,6 +395,18 @@ mixin typeAdapter(name, types, members)
   |         public void write(JsonWriter jsonWriter, #{name} object) throws IOException {
   |             jsonWriter.beginObject();
   | 
+  each member in baseMembers
+    if (!member.noGson)
+      - if (member.type.match(/(boolean|short|int|long|float|double)/i))
+       |             jsonWriter.name("#{member.serializedName || member.name}");
+       |             m#{member.adapterType}Adapter.write(jsonWriter, object.get#{camelCase(capitalize(member.name))}());
+       | 
+      - else
+       |             if (object.get#{camelCase(capitalize(member.name))}() != null) {
+       |                 jsonWriter.name("#{member.serializedName || member.name}");
+       |                 m#{member.adapterType}Adapter.write(jsonWriter, object.get#{camelCase(capitalize(member.name))}());
+       |             }
+       | 
   each member in members
     if (!member.noGson)
       - if (member.type.match(/(boolean|short|int|long|float|double)/i))
@@ -412,8 +438,16 @@ mixin classDeclaration
  - else 
    | 
  - if (parcelable)
-   | public class #{name} implements Parcelable {
-   | 
+   - if (baseClassName)
+     | public class #{name} extends #{baseClassName} implements Parcelable {
+     | 
+   - else
+     | public class #{name} implements Parcelable {
+     | 
  - else
-   | public class #{name} {
-   | 
+   - if (baseClassName)
+     | public class #{name} extends #{baseClassName} {
+     | 
+   - else
+     | public class #{name} {
+     | 
